@@ -9,15 +9,12 @@
 Module.register('MMM-Skolschema', {
   // Define module defaults
   defaults: {
-    updateInterval: 4 * 60 * 60 * 1000,
     showNextDayAt: '0:00',
-    showWeekdayinHeader: true,
     noScheduleText: '',
-    lookFor: [],
-    notifyText: [],
     schedule: [],
-    alarmInterval: 60 * 1000,
+    scheduleInterval: 60 * 1000,
     alarms: [],
+    alarmInterval: 60 * 1000,
   },
 
   getStyles: function () {
@@ -39,22 +36,22 @@ Module.register('MMM-Skolschema', {
     const now = new Date();
     const nowTime = now.getHours() * 60 + now.getMinutes();
 
-    const [aH, aM] = alarm.time.split(':');
+    const [aH, aM] = alarm.start.split(':');
     const alarmStart = parseInt(aH, 10) * 60 + parseInt(aM, 10);
-    const alarmEnd = alarmStart + alarm.lasting / 1000 / 60;
+    const [eH, eM] = alarm.end.split(':');
+    const alarmEnd = parseInt(eH, 10) * 60 + parseInt(eM, 10);
+    const timerMs = alarmEnd - alarmStart * 60 * 1000;
 
     const hasAlarm = this.currentAlarms.includes(alarm.label);
 
     if (nowTime >= alarmStart && nowTime < alarmEnd) {
       if (!hasAlarm) {
         this.currentAlarms.push(alarm.label);
-        console.log('We have alarm today', alarm);
-
         this.sendNotification(
           'SHOW_ALERT',
           {
             type: 'notification',
-            timer: alarm.lasting,
+            timer: timerMs,
             message: alarm.message,
           },
           alarm.label
@@ -149,10 +146,10 @@ Module.register('MMM-Skolschema', {
           : currDayNum + 1
         : currDayNum;
 
-    const schedule = this.config.schedule.filter(
+    const schedule = this.config.schedules.filter(
       (item) =>
         Object.keys(item)[0] ===
-        Object.keys(this.config.schedule[thisDayNum])[0]
+        Object.keys(this.config.schedules[thisDayNum])[0]
     )[0];
 
     return schedule;
