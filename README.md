@@ -22,7 +22,7 @@ git clone https://github.com/Lavve/MMM-Skolschema
     showNextDayAt: '0:00',
     noScheduleText: '',
     schedules: [],
-    scheduleInterval: '4 * 60 * 60 * 1000',
+    scheduleInterval: '60 * 1000',
     alarms: [],
     alarmInterval: '60 * 1000',
   },
