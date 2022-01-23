@@ -1,0 +1,48 @@
+.MMM-Skolschema-table .row td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0 1rem;
+}
+
+.MMM-Skolschema-table .row.current-day {
+  color: #fff;
+}
+
+.MMM-Skolschema-table .day {
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+}
+
+.MMM-Skolschema-table .schedule-block {
+  padding-bottom: 1rem;
+}
+
+.MMM-Skolschema-table .percent {
+  display: none;
+}
+
+.MMM-Skolschema-table .current {
+  color: #fff;
+}
+
+.MMM-Skolschema-table .current .percent {
+  height: 2px;
+  background: #666;
+  display: block;
+  position: relative;
+}
+
+.MMM-Skolschema-table .current .percent-value {
+  display: block;
+  background: #eee;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+}
+
+.MMM-Skolschema-table .row .no-schedule {
+  text-align: center;
+}
