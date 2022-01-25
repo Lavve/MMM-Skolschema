@@ -10,12 +10,12 @@ Module.register('MMM-Skolschema', {
   defaults: {
     showNextDayAt: '0:00',
     noScheduleText: '',
-    showCurrentTimer: true,
+    showCurrentProgress: true,
+    progressColor: '',
     schedules: [],
     scheduleInterval: 60 * 1000,
     alarms: [],
     alarmInterval: 60 * 1000,
-    alarmBgColor: '#dd4f4f',
   },
 
   getStyles: function () {
@@ -128,6 +128,10 @@ Module.register('MMM-Skolschema', {
         const percentDivValue = document.createElement('div');
         percentDivValue.classList.add('percent-value');
 
+        if (this.config.progressColor !== '') {
+          percentDivValue.style.backgroundColor = this.config.progressColor;
+        }
+
         const percent = Math.round(
           (100 * (nowTime - startTime)) / (endTime - startTime)
         );
@@ -165,7 +169,7 @@ Module.register('MMM-Skolschema', {
     return schedule;
   },
 
-  appendSchedule: function (scheduleCell) {
+  appendNewSchedule: function (scheduleCell) {
     scheduleCell.appendChild(this.generateScheduleList());
     this.timer = setInterval(() => {
       scheduleCell.innerHTML = '';
@@ -192,7 +196,7 @@ Module.register('MMM-Skolschema', {
     dayRow.appendChild(dayCell);
 
     this.checkForAlarms();
-    this.appendSchedule(scheduleCell);
+    this.appendNewSchedule(scheduleCell);
 
     setInterval(() => {
       this.currSchedule = this.getCurrentSchedule();
@@ -210,7 +214,7 @@ Module.register('MMM-Skolschema', {
         }
 
         this.checkForAlarms();
-        this.appendSchedule(scheduleCell);
+        this.appendNewSchedule(scheduleCell);
       }
     }, 60 * 1000);
 

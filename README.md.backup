@@ -21,8 +21,10 @@ git clone https://github.com/Lavve/MMM-Skolschema
   config: {
     showNextDayAt: '0:00',
     noScheduleText: '',
+    showCurrentProgress: true,
+    progressColor: '',
     schedules: [],
-    scheduleInterval: '4 * 60 * 60 * 1000',
+    scheduleInterval: '60 * 1000',
     alarms: [],
     alarmInterval: '60 * 1000',
   },
@@ -34,16 +36,19 @@ git clone https://github.com/Lavve/MMM-Skolschema
 Theese nodes are available:
 | Configuration | Default | Type | Description |
 | --- | --- | --- | --- |
-| showNextDayAt | `"0:00"` | string | At what time should the next day come up |
-| noScheduleText | `""` | string | Text that is shown when the schedule is empty |
+| showNextDayAt | `"0:00"` | str | At what time should the next day come up |
+| noScheduleText | `""` | str | Text that is shown when the schedule is empty |
+| showCurrentProgress | `true` | bool| Show a progressbar below current row in schedule |
+| progressColor | `''` | str | Color  |
 | schedule | `[]` | array | List of schedules for all day's of the week. [See below](#schedule-example) |
 | scheduleInterval | `60 * 1000` | int | Frequency of updates of schedule (in ms) |
 | alarms | `[]` | array | List of alarms. [See below](#alarm-example) |
 | alarmInterval | `60 * 1000` | int | Check for alarms frequency (in ms) |
+| alarmBgColor | `#dd4f4f` | string | Change the default background color of the alert box |
 
 ### Schedule example
 
-Configuration example for the schedule part above. Must include all days in a week. If a day has a schedule then `start`, `end` and `label` must be set, otherwise just put an empty array. Start and end time in *24h format* only.
+Configuration example for the schedule. Must include all days in a week. If a day has a schedule then `start`, `end` and `label` must be set, otherwise just put an empty array. Start and end time in *24h format only*.
 
 ```javascript
 schedule: [{
@@ -68,7 +73,7 @@ schedule: [{
 
 ### Alarm example
 
-Configuration example for the alarm part above. Must include `label` that has to be *exact* what is set in the [schedule above](#schedule-example) and a `message` that is shown between the `start` and `end` time. Start and end time in *24h format* only.
+Configuration example for alarms. Must include `label` that has to be *exactly* what is set in the [schedule above](#schedule-example) and a `message` that is shown between the `start` and `end` time. If `end` is empty or excluded, the end time will be 2h after `start`. Start and end time in *24h format only*.
 
 ```javascript
 alarms: [
@@ -82,7 +87,6 @@ alarms: [
     label: 'Fotboll',
     message: "Glöm inte fotbollsskorna! ⚽",
     start: '9:30',
-    end: '10:00',
   },
 ],
 ```

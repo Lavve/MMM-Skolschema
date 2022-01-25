@@ -22,6 +22,7 @@ git clone https://github.com/Lavve/MMM-Skolschema
     showNextDayAt: '0:00',
     noScheduleText: '',
     showCurrentProgress: true,
+    progressColor: '',
     schedules: [],
     scheduleInterval: '60 * 1000',
     alarms: [],
@@ -38,11 +39,11 @@ Theese nodes are available:
 | showNextDayAt | `"0:00"` | str | At what time should the next day come up |
 | noScheduleText | `""` | str | Text that is shown when the schedule is empty |
 | showCurrentProgress | `true` | bool| Show a progressbar below current row in schedule |
+| progressColor | `'#eee'` | str | Color of the progress bar |
 | schedule | `[]` | array | List of schedules for all day's of the week. [See below](#schedule-example) |
 | scheduleInterval | `60 * 1000` | int | Frequency of updates of schedule (in ms) |
 | alarms | `[]` | array | List of alarms. [See below](#alarm-example) |
 | alarmInterval | `60 * 1000` | int | Check for alarms frequency (in ms) |
-| alarmBgColor | `#dd4f4f` | string | Change the default background color of the alert box |
 
 ### Schedule example
 
