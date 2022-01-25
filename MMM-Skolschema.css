@@ -1,3 +1,11 @@
+.ns-box {
+  background: #dd4f4f;
+}
+
+.ns-box .light {
+  font-weight: 600;
+}
+
 .MMM-Skolschema-table .row td {
   text-align: left;
   vertical-align: top;
