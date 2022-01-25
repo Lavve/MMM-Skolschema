@@ -1,11 +1,10 @@
-/* Skolschema */
-
 /* Magic Mirror
  * Module: MMM-Skolschema
  *
  * By Magnus Claesson https://github.com/Lavve
  * MIT Licensed.
  */
+
 Module.register('MMM-Skolschema', {
   // Define module defaults
   defaults: {
@@ -166,9 +165,12 @@ Module.register('MMM-Skolschema', {
     return schedule;
   },
 
-  appendSchedule: function (cell) {
-    cell.innerHTML = '';
-    cell.appendChild(this.generateScheduleList());
+  appendSchedule: function (scheduleCell) {
+    scheduleCell.appendChild(this.generateScheduleList());
+    this.timer = setInterval(() => {
+      scheduleCell.innerHTML = '';
+      scheduleCell.appendChild(this.generateScheduleList());
+    }, this.config.updateInterval);
   },
 
   generateTable: function () {
@@ -182,19 +184,15 @@ Module.register('MMM-Skolschema', {
 
     this.currSchedule = this.getCurrentSchedule();
     this.currentDay = Object.keys(this.currSchedule)[0];
-    // console.log(this.currentDay, this.currSchedule);
     let tempDay = this.currentDay;
-
-    this.appendSchedule(scheduleCell);
-    this.timer = setInterval(() => {
-      this.appendSchedule(scheduleCell);
-    }, this.config.updateInterval);
+    // console.log(this.currentDay, this.currSchedule);
 
     dayCell.classList.add('day');
     dayCell.innerHTML = this.currentDay;
     dayRow.appendChild(dayCell);
 
     this.checkForAlarms();
+    this.appendSchedule(scheduleCell);
 
     setInterval(() => {
       this.currSchedule = this.getCurrentSchedule();
@@ -212,11 +210,7 @@ Module.register('MMM-Skolschema', {
         }
 
         this.checkForAlarms();
-
         this.appendSchedule(scheduleCell);
-        this.timer = setInterval(() => {
-          this.appendSchedule(scheduleCell);
-        }, this.config.updateInterval);
       }
     }, 60 * 1000);
 
