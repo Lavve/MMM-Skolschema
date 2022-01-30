@@ -4,7 +4,7 @@ A module for [MagicMirror²](https://github.com/MichMich/MagicMirror) that shows
 
 ## Installation
 
-1. Clone this repository into `MagicMirror/modules/` inside your MagicMirror² folder.
+1. Clone this repository into `MagicMirror/modules/`.
 
 ```
 cd ~/MagicMirror/modules
@@ -19,35 +19,45 @@ git clone https://github.com/Lavve/MMM-Skolschema
   header: "Dagens schema",
   position: "bottom_center",
   config: {
-    showNextDayAt: '0:00',
-    noScheduleText: '',
-    showCurrentProgress: true,
-    progressColor: '',
-    schedules: [],
-    scheduleInterval: '60 * 1000',
-    alarms: [],
-    alarmInterval: '60 * 1000',
+    ...
   },
 },
 ```
 
 ## Configuration
 
-Theese nodes are available:
+Theese nodes are available to make your magic schedule:
 | Configuration | Default | Type | Description |
 | --- | --- | --- | --- |
-| showNextDayAt | `"0:00"` | str | At what time should the next day come up |
-| noScheduleText | `""` | str | Text that is shown when the schedule is empty |
-| showCurrentProgress | `true` | bool| Show a progressbar below current row in schedule |
-| progressColor | `'#eee'` | str | Color of the progress bar |
-| schedule | `[]` | array | List of schedules for all day's of the week. [See below](#schedule-example) |
-| scheduleInterval | `60 * 1000` | int | Frequency of updates of schedule (in ms) |
-| alarms | `[]` | array | List of alarms. [See below](#alarm-example) |
-| alarmInterval | `60 * 1000` | int | Check for alarms frequency (in ms) |
+| showDayname | `'true'` | bool | Show current day name above schedule |
+| showNextDayAt | `'0:00'` | str | At what time should the next day come up. _24h format only_ |
+| noScheduleText | `''` | str | Text shown when schedule for the current day is empty |
+| showCurrentProgress | `true` | bool| Show a progressbar below current row in the schedule |
+| progressColor | `'#fff'` | str | Color of the progress bar |
+| schedule | `[]` | array | List of schedules for all day's of the week. [See below](#schedule) |
 
-### Schedule example
+### Schedule
 
-Configuration example for the schedule. Must include all days in a week. If a day has a schedule then `start`, `end` and `label` must be set, otherwise just put an empty array. Start and end time in *24h format only*.
+Configuration for the schedule. Must include _all days_ in a week, Monday to Sunday (in that order), in preferable language. If a day has a schedule it must include `start`, `end` and `label`. If a day don't have a schedule an empty array must be set.
+
+| Node | Optional | Type | Example | Description |
+| --- | --- | --- | --- | --- |
+| `start` |  | str | `'8:15'` | Start time of current schedule row. _24h format only_ |
+| `end` |  | str | `'9:25'` | End time of current schedule row. _24h format only_ |
+| `label` |  | str | `'Svenska'` | Label of the current schedule row |
+| `alarm` | ✓ | obj | null | Settings for alarms. [See below](#alarm) |
+
+### Alarm
+
+If you want an alarm notification, the following configuration must be set.
+
+| Node | Optional | Type | Example | Description |
+| --- | --- | --- | --- | --- |
+| `start` |  | str | `'7:30'` | Start time when alarm is visible. _24h format only_ |
+| `end` | ✓ | str | `'8:00'` | End time when alarm is hidden. _24h format only_ |
+| `message` |  | str | ´'Ta med fotbollsskorna! ⚽'´ | Text that is shown in the alarm notification |
+
+## Example
 
 ```javascript
 schedule: [{
@@ -64,31 +74,21 @@ schedule: [{
   'Torsdag': [],
   'Fredag': [],
   'Lördag': [
-    { start: '10:00', end: '11:30', label: 'Fotboll' },
+    { 
+      start: '10:00',
+      end: '11:30',
+      label: 'Tennis',
+      alarm: {
+        start: '9:30',
+        end: '10:00',
+        message: 'Kom ihåg att ta med racket! 🎾',
+      },
+    },
   ],
   'Söndag': [],
 }],
 ```
 
-### Alarm example
-
-Configuration example for alarms. Must include `label` that has to be *exactly* what is set in the [schedule above](#schedule-example) and a `message` that is shown between the `start` and `end` time. If `end` is empty or excluded, the end time will be 2h after `start`. Start and end time in *24h format only*.
-
-```javascript
-alarms: [
-  {
-    label: 'Idrott',
-    message: "Glöm inte gympapåsen!",
-    start: '6:30',
-    end: '7:30',
-  },
-  {
-    label: 'Fotboll',
-    message: "Glöm inte fotbollsskorna! ⚽",
-    start: '9:30',
-  },
-],
-```
 
 ## Collaborate
 

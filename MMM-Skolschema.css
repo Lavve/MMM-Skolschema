@@ -12,43 +12,29 @@
   padding: 0 1rem;
 }
 
-.MMM-Skolschema-table .row.current-day {
-  color: #fff;
-}
-
 .MMM-Skolschema-table .day {
-  font-weight: bold;
-  color: #fff;
   text-align: center;
+  padding: 0 0 0.5rem;
 }
 
 .MMM-Skolschema-table .schedule-block {
-  padding-bottom: 1rem;
+  margin-bottom: 1rem;
 }
 
-.MMM-Skolschema-table .percent {
-  display: none;
-}
-
-.MMM-Skolschema-table .current {
-  color: #fff;
-}
-
-.MMM-Skolschema-table .current .percent {
+.MMM-Skolschema-table .percent-bar {
   height: 2px;
-  background: #666;
-  display: block;
   position: relative;
 }
 
-.MMM-Skolschema-table .current .percent-value {
+.MMM-Skolschema-table .percent-value {
   display: block;
-  background: #eee;
+  background: rgba(0, 0, 0, 0.4);
   position: absolute;
   top: 0;
-  left: 0;
   right: 0;
   height: 2px;
+  will-change: width;
+  transition: width 0.23s;
 }
 
 .MMM-Skolschema-table .row .no-schedule {
