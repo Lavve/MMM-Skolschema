@@ -6,27 +6,42 @@
   font-weight: 600;
 }
 
-.MMM-Skolschema-table .row td {
-  text-align: left;
-  vertical-align: top;
-  padding: 0 1rem;
-}
-
-.MMM-Skolschema-table .day {
+.MMM-Skolschema__content .day {
   text-align: center;
   padding: 0 0 0.5rem;
 }
 
-.MMM-Skolschema-table .schedule-block {
+.MMM-Skolschema__content .schedule-rows {
   margin-bottom: 1rem;
 }
 
-.MMM-Skolschema-table .percent-bar {
-  height: 2px;
-  position: relative;
+.MMM-Skolschema__content .schedule-row {
+  display: flex;
+  justify-content: space-between;
+  flex-flow: row wrap;
+  align-items: baseline;
 }
 
-.MMM-Skolschema-table .percent-value {
+.MMM-Skolschema__content .schedule-time {
+}
+
+.MMM-Skolschema__content .schedule-label {
+  margin: 0 0 0 1rem;
+}
+
+.MMM-Skolschema__content .schedule-row.mirror .schedule-label {
+  margin: 0 1rem 0 0;
+}
+
+.MMM-Skolschema__content .percent-bar {
+  width: 100%;
+  height: 2px;
+  position: relative;
+  align-self: flex-end;
+  margin: 0.2rem 0 0.5rem;
+}
+
+.MMM-Skolschema__content .percent-value {
   display: block;
   background: rgba(0, 0, 0, 0.4);
   position: absolute;
@@ -37,6 +52,6 @@
   transition: width 0.23s;
 }
 
-.MMM-Skolschema-table .row .no-schedule {
+.MMM-Skolschema__content .row .no-schedule {
   text-align: center;
 }
