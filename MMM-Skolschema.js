@@ -25,36 +25,16 @@ Module.register('MMM-Skolschema', {
     return [this.name + '.css'];
   },
 
+  getScripts: function () {
+    return ['helpers.js'];
+  },
+
   start: function () {
     Log.info('Starting module: ' + this.name);
   },
 
-  time2Mins: function (time, add = 0) {
-    if (!time) {
-      const now = new Date();
-      return (now.getHours() + add) * 60 + now.getMinutes();
-    }
-
-    if (this.config.timeFormat === 12) {
-      const hm = time.slice(0, -2).trim();
-      const mod = time.slice(-2).trim();
-      let [h, m] = hm.split(':');
-      h = parseInt(h, 10);
-      m = parseInt(m, 10);
-      h = h === 12 ? 0 : h;
-      h = mod.toLowerCase() === 'pm' ? h + 12 + add : h + add;
-
-      return h * 60 + m;
-    } else {
-      return (
-        (parseInt(time.split(':')[0], 10) + add) * 60 +
-        parseInt(time.split(':')[1], 10)
-      );
-    }
-  },
-
   setAlarmNotice: function (alarm, i) {
-    const nowTime = this.time2Mins();
+    const nowTime = helpers.time2Mins(this.config.timeFormat);
     const alarmStart = nowTime > alarm.start ? nowTime : alarm.start;
 
     let alarmEnd = 0;
@@ -93,17 +73,8 @@ Module.register('MMM-Skolschema', {
     });
   },
 
-  setProgress: function (rowEl, nowTime) {
-    const progressEl = rowEl.querySelector('.percent-value');
-    const start = progressEl.dataset.start;
-    const end = progressEl.dataset.end;
-    const percent = Math.round(100 - (100 * (nowTime - start)) / (end - start));
-
-    progressEl.style.width = percent + '%';
-  },
-
   setCurrent: function () {
-    const nowTime = this.time2Mins();
+    const nowTime = helpers.time2Mins(this.config.timeFormat);
 
     this.scheduleRows.forEach((rowEl) => {
       const progressBar = rowEl.querySelector('.percent-bar');
@@ -115,7 +86,7 @@ Module.register('MMM-Skolschema', {
           if (progressBar) {
             progressBar.style.display = 'block';
           }
-          this.setProgress(rowEl, nowTime);
+          helpers.setProgress(rowEl, nowTime);
         }
       } else {
         rowEl.classList.remove('bright');
@@ -128,19 +99,6 @@ Module.register('MMM-Skolschema', {
     setTimeout(() => {
       this.setCurrent();
     }, 60 * 1000);
-  },
-
-  formatAlarm: function (alarm) {
-    const convert = {};
-    convert.start = this.time2Mins(alarm.start);
-
-    if (alarm.hasOwnProperty('end')) {
-      convert.end = this.time2Mins(alarm.end);
-    } else {
-      convert.end = this.time2Mins(alarm.start, 2);
-    }
-    convert.message = alarm.message;
-    return convert;
   },
 
   getScheduleList: function () {
@@ -158,7 +116,7 @@ Module.register('MMM-Skolschema', {
     this.currSchedule[this.currentDay].forEach((row, i) => {
       if (row.hasOwnProperty('alarms')) {
         row.alarms.forEach((a) => {
-          this.alarms.push(this.formatAlarm(a));
+          this.alarms.push(helpers.formatAlarm(a, this.config.timeFormat));
         });
 
         this.currSchedule[this.currentDay].splice(i, 1);
@@ -190,8 +148,8 @@ Module.register('MMM-Skolschema', {
         rowEl.appendChild(labelEl);
       }
 
-      const start = this.time2Mins(row.start);
-      const end = this.time2Mins(row.end);
+      const start = helpers.time2Mins(this.config.timeFormat, row.start);
+      const end = helpers.time2Mins(this.config.timeFormat, row.end);
 
       rowEl.dataset.start = start;
       rowEl.dataset.end = end;
@@ -219,11 +177,14 @@ Module.register('MMM-Skolschema', {
 
       if (row.hasOwnProperty('alarm')) {
         this.alarms.push(
-          this.formatAlarm({
-            start: row.start,
-            end: row.end,
-            message: row.alarm,
-          })
+          this.formatAlarm(
+            {
+              start: row.start,
+              end: row.end,
+              message: row.alarm,
+            },
+            this.config.timeFormat
+          )
         );
       }
 
@@ -245,7 +206,7 @@ Module.register('MMM-Skolschema', {
 
   getCurrentSchedule: function () {
     const now = new Date();
-    const nowMins = this.time2Mins();
+    const nowMins = helpers.time2Mins(this.config.timeFormat);
     const currDayNum = now.getDay() - 1 < 0 ? 6 : now.getDay() - 1;
     const thisDayNum =
       nowMins >= this.nextDayMinutes
@@ -270,7 +231,10 @@ Module.register('MMM-Skolschema', {
     this.alarms = [];
     this.alarmTimer = null;
     this.currentAlarms = [];
-    this.nextDayMinutes = this.time2Mins(this.config.showNextDayAt);
+    this.nextDayMinutes = helpers.time2Mins(
+      this.config.timeFormat,
+      this.config.showNextDayAt
+    );
 
     const scheduleContent = document.createElement('div');
     scheduleContent.classList.add('MMM-Skolschema__content');
