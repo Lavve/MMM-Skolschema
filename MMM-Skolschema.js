@@ -15,6 +15,7 @@ Module.register('MMM-Skolschema', {
     noScheduleText: '',
     showCurrentProgress: true,
     progressColor: '#fff',
+    dividerColor: '',
     schedules: [],
   },
 
@@ -163,7 +164,7 @@ Module.register('MMM-Skolschema', {
       rowDiv.classList.add('schedule-row');
 
       const timeEl = document.createElement('span');
-      timeEl.classList.add('schedule-time', 'light');
+      timeEl.classList.add('schedule-time', 'thin', 'xsmall');
       let timeContent = row.start;
       if (this.config.showEndTime) {
         timeContent += ` &ndash; ${row.end}`;
@@ -188,6 +189,13 @@ Module.register('MMM-Skolschema', {
 
       rowDiv.dataset.start = start;
       rowDiv.dataset.end = end;
+
+      if (row.hasOwnProperty('divider')) {
+        rowDiv.classList.add(`divider-${row.divider}`);
+        if (this.config.dividerColor !== '') {
+          rowDiv.style.borderColor = this.config.dividerColor;
+        }
+      }
 
       // Prepare progress bar
       if (this.config.showCurrentProgress) {
