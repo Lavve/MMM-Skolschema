@@ -1,4 +1,4 @@
-const helpers = {
+const H = {
   time2Mins: function (timeFormat, time, add = 0) {
     if (!time) {
       const now = new Date();
@@ -34,14 +34,24 @@ const helpers = {
 
   formatAlarm: function (alarm, format) {
     const convert = {};
-    convert.start = helpers.time2Mins(format, alarm.start);
+    convert.start = this.time2Mins(format, alarm.start);
 
     if (alarm.hasOwnProperty('end')) {
-      convert.end = helpers.time2Mins(format, alarm.end);
+      convert.end = this.time2Mins(format, alarm.end);
     } else {
-      convert.end = helpers.time2Mins(format, alarm.start, 2);
+      convert.end = this.time2Mins(format, alarm.start, 2);
     }
     convert.message = alarm.message;
     return convert;
+  },
+
+  sync2Sec: function (that) {
+    const syncTimer = setInterval(() => {
+      const now = new Date();
+      if (now.getSeconds() === 0) {
+        clearInterval(syncTimer);
+        that.updateDom();
+      }
+    }, 1000);
   },
 };

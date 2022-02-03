@@ -31,10 +31,12 @@ Module.register('MMM-Skolschema', {
 
   start: function () {
     Log.info('Starting module: ' + this.name);
+    this.currentAlarms = [];
+    H.sync2Sec(this);
   },
 
   setAlarmNotice: function (alarm, i) {
-    const nowTime = helpers.time2Mins(this.config.timeFormat);
+    const nowTime = H.time2Mins(this.config.timeFormat);
     const alarmStart = nowTime > alarm.start ? nowTime : alarm.start;
 
     let alarmEnd = 0;
@@ -74,7 +76,7 @@ Module.register('MMM-Skolschema', {
   },
 
   setCurrent: function () {
-    const nowTime = helpers.time2Mins(this.config.timeFormat);
+    const nowTime = H.time2Mins(this.config.timeFormat);
 
     this.scheduleRows.forEach((rowEl) => {
       const progressBar = rowEl.querySelector('.percent-bar');
@@ -86,7 +88,7 @@ Module.register('MMM-Skolschema', {
           if (progressBar) {
             progressBar.style.display = 'block';
           }
-          helpers.setProgress(rowEl, nowTime);
+          H.setProgress(rowEl, nowTime);
         }
       } else {
         rowEl.classList.remove('bright');
@@ -116,7 +118,7 @@ Module.register('MMM-Skolschema', {
     this.currSchedule[this.currentDay].forEach((row, i) => {
       if (row.hasOwnProperty('alarms')) {
         row.alarms.forEach((a) => {
-          this.alarms.push(helpers.formatAlarm(a, this.config.timeFormat));
+          this.alarms.push(H.formatAlarm(a, this.config.timeFormat));
         });
 
         this.currSchedule[this.currentDay].splice(i, 1);
@@ -148,8 +150,8 @@ Module.register('MMM-Skolschema', {
         rowEl.appendChild(labelEl);
       }
 
-      const start = helpers.time2Mins(this.config.timeFormat, row.start);
-      const end = helpers.time2Mins(this.config.timeFormat, row.end);
+      const start = H.time2Mins(this.config.timeFormat, row.start);
+      const end = H.time2Mins(this.config.timeFormat, row.end);
 
       rowEl.dataset.start = start;
       rowEl.dataset.end = end;
@@ -206,7 +208,7 @@ Module.register('MMM-Skolschema', {
 
   getCurrentSchedule: function () {
     const now = new Date();
-    const nowMins = helpers.time2Mins(this.config.timeFormat);
+    const nowMins = H.time2Mins(this.config.timeFormat);
     const currDayNum = now.getDay() - 1 < 0 ? 6 : now.getDay() - 1;
     const thisDayNum =
       nowMins >= this.nextDayMinutes
@@ -230,11 +232,16 @@ Module.register('MMM-Skolschema', {
     this.currentDay = '';
     this.alarms = [];
     this.alarmTimer = null;
-    this.currentAlarms = [];
-    this.nextDayMinutes = helpers.time2Mins(
+    this.nextDayMinutes = H.time2Mins(
       this.config.timeFormat,
       this.config.showNextDayAt
     );
+    if (this.alarmTimer) {
+      clearInterval(this.alarmTimer);
+    }
+    if (this.newDayTimer) {
+      clearInterval(this.newDayTimer);
+    }
 
     const scheduleContent = document.createElement('div');
     scheduleContent.classList.add('MMM-Skolschema__content');
@@ -254,7 +261,7 @@ Module.register('MMM-Skolschema', {
     scheduleContent.appendChild(this.getScheduleList());
 
     // Check if new day
-    setInterval(() => {
+    this.newDayTimer = setInterval(() => {
       this.currSchedule = this.getCurrentSchedule();
       this.currentDay = Object.keys(this.currSchedule)[0];
 
