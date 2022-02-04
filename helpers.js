@@ -1,8 +1,8 @@
 const H = {
-  time2Mins: function (timeFormat, time, add = 0) {
+  time2Mins: function (timeFormat, time, addMins = 0) {
     if (!time) {
       const now = new Date();
-      return (now.getHours() + add) * 60 + now.getMinutes();
+      return now.getHours() * 60 + now.getMinutes() + addMins;
     }
 
     if (timeFormat === 12) {
@@ -12,13 +12,14 @@ const H = {
       h = parseInt(h, 10);
       m = parseInt(m, 10);
       h = h === 12 ? 0 : h;
-      h = mod.toLowerCase() === 'pm' ? h + 12 + add : h + add;
+      h = mod.toLowerCase() === 'pm' ? h + 12 : h;
 
-      return h * 60 + m;
+      return h * 60 + m + addMins;
     } else {
       return (
-        (parseInt(time.split(':')[0], 10) + add) * 60 +
-        parseInt(time.split(':')[1], 10)
+        parseInt(time.split(':')[0], 10) * 60 +
+        parseInt(time.split(':')[1], 10) +
+        addMins
       );
     }
   },
@@ -32,14 +33,18 @@ const H = {
     progressEl.style.width = percent + '%';
   },
 
-  formatAlarm: function (alarm, format) {
+  formatAlarm: function (alarm, config) {
     const convert = {};
-    convert.start = this.time2Mins(format, alarm.start);
+    convert.start = this.time2Mins(config.timeFormat, alarm.start);
 
     if (alarm.hasOwnProperty('end')) {
-      convert.end = this.time2Mins(format, alarm.end);
+      convert.end = this.time2Mins(config.timeFormat, alarm.end);
     } else {
-      convert.end = this.time2Mins(format, alarm.start, 2);
+      convert.end = this.time2Mins(
+        config.timeFormat,
+        alarm.start,
+        config.defaultAlarmEnd
+      );
     }
     convert.message = alarm.message;
     return convert;
@@ -49,9 +54,25 @@ const H = {
     const syncTimer = setInterval(() => {
       const now = new Date();
       if (now.getSeconds() === 0) {
+        console.log(`${that.name} :: Time is synced`);
         clearInterval(syncTimer);
+        this.resetTimers(that);
         that.updateDom();
       }
     }, 1000);
+  },
+
+  resetTimers: function (that) {
+    if (that.currentTimer) {
+      clearTimeout(that.currentTimer);
+    }
+
+    if (that.alarmTimer) {
+      clearInterval(that.alarmTimer);
+    }
+
+    if (that.newDayTimer) {
+      clearInterval(that.newDayTimer);
+    }
   },
 };

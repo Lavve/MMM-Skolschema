@@ -13,6 +13,7 @@ Module.register('MMM-Skolschema', {
     showEndTime: false,
     showCurrent: true,
     timeFormat: config.timeFormat,
+    defaultAlarmEnd: 2 * 60,
     rowFormat: 'time:label',
     noScheduleText: '',
     showCurrentProgress: true,
@@ -98,107 +99,133 @@ Module.register('MMM-Skolschema', {
       }
     });
 
-    setTimeout(() => {
+    this.currentTimer = setTimeout(() => {
       this.setCurrent();
     }, 60 * 1000);
   },
 
+  unsetCurrent: function () {
+    this.scheduleRows.forEach((rowEl) => {
+      const progressBar = rowEl.querySelector('.percent-bar');
+      rowEl.classList.remove('bright');
+      if (progressBar) {
+        progressBar.style.display = 'none';
+      }
+    });
+  },
+
+  getAlarmList: function () {
+    if (
+      this.currSchedule[this.scheduleDay].hasOwnProperty('alarms') &&
+      this.currSchedule[this.scheduleDay].alarms.length
+    ) {
+      this.currSchedule[this.scheduleDay].alarms.forEach((a) => {
+        if (
+          a.hasOwnProperty('start') &&
+          a.start !== '' &&
+          a.hasOwnProperty('message') &&
+          a.message !== ''
+        ) {
+          this.alarms.push(H.formatAlarm(a, this.config));
+        }
+      });
+    }
+  },
+
   getScheduleList: function () {
     const cellDiv = document.createElement('div');
-    this.alarms = [];
 
-    // console.log(this.currentDay, this.currSchedule);
-
-    if (!this.currSchedule[this.currentDay].length) {
+    if (
+      !this.currSchedule[this.scheduleDay].hasOwnProperty('schedule') ||
+      !this.currSchedule[this.scheduleDay].schedule.length
+    ) {
       cellDiv.classList.add('no-schedule');
       cellDiv.innerHTML = this.config.noScheduleText;
       return cellDiv;
     }
 
-    this.currSchedule[this.currentDay].forEach((row, i) => {
-      if (row.hasOwnProperty('alarms')) {
-        row.alarms.forEach((a) => {
-          this.alarms.push(H.formatAlarm(a, this.config.timeFormat));
-        });
+    const rowLength = this.currSchedule[this.scheduleDay].schedule.length;
 
-        this.currSchedule[this.currentDay].splice(i, 1);
-      }
-    });
+    this.scheduleRows = this.currSchedule[this.scheduleDay].schedule.map(
+      (row, i) => {
+        const rowEl = document.createElement('div');
+        rowEl.classList.add('schedule-row');
 
-    this.scheduleRows = this.currSchedule[this.currentDay].map((row) => {
-      const rowEl = document.createElement('div');
-      rowEl.classList.add('schedule-row');
+        const timeEl = document.createElement('span');
+        timeEl.classList.add('schedule-time', 'thin', 'xsmall');
+        let timeContent = row.start;
 
-      const timeEl = document.createElement('span');
-      timeEl.classList.add('schedule-time', 'thin', 'xsmall');
-      let timeContent = row.start;
-      if (this.config.showEndTime) {
-        timeContent += ` &ndash; ${row.end}`;
-      }
-      timeEl.innerHTML = timeContent;
-
-      const labelEl = document.createElement('span');
-      labelEl.classList.add('schedule-label');
-      labelEl.innerHTML = row.label;
-
-      if (this.config.rowFormat === 'label:time') {
-        rowEl.classList.add('mirror');
-        rowEl.appendChild(labelEl);
-        rowEl.appendChild(timeEl);
-      } else {
-        rowEl.appendChild(timeEl);
-        rowEl.appendChild(labelEl);
-      }
-
-      const start = H.time2Mins(this.config.timeFormat, row.start);
-      const end = H.time2Mins(this.config.timeFormat, row.end);
-
-      rowEl.dataset.start = start;
-      rowEl.dataset.end = end;
-
-      if (row.hasOwnProperty('divider')) {
-        rowEl.classList.add(`divider-${row.divider}`);
-        if (this.config.dividerColor !== '') {
-          rowEl.style.borderColor = this.config.dividerColor;
+        if (!row.hasOwnProperty('end') || row.end === '') {
+          row.end =
+            i !== rowLength - 1
+              ? this.currSchedule[this.scheduleDay].schedule[i + 1].start
+              : '23:59';
         }
+
+        if (this.config.showEndTime) {
+          timeContent += ` &ndash; ${row.end}`;
+        }
+        timeEl.innerHTML = timeContent;
+
+        const labelEl = document.createElement('span');
+        labelEl.classList.add('schedule-label');
+        labelEl.innerHTML = row.label;
+
+        if (this.config.rowFormat === 'label:time') {
+          rowEl.classList.add('mirror');
+          rowEl.appendChild(labelEl);
+          rowEl.appendChild(timeEl);
+        } else {
+          rowEl.appendChild(timeEl);
+          rowEl.appendChild(labelEl);
+        }
+
+        const start = H.time2Mins(this.config.timeFormat, row.start);
+        const end = H.time2Mins(this.config.timeFormat, row.end);
+
+        rowEl.dataset.start = start;
+        rowEl.dataset.end = end;
+
+        if (row.hasOwnProperty('divider') && row.divider !== '') {
+          rowEl.classList.add(`divider-${row.divider}`);
+          if (this.config.dividerColor !== '') {
+            rowEl.style.borderColor = this.config.dividerColor;
+          }
+        }
+
+        // Prepare progress bar
+        if (this.config.showCurrentProgress) {
+          const percentDiv = document.createElement('div');
+          percentDiv.classList.add('percent-bar');
+          percentDiv.style.backgroundColor = this.config.progressColor;
+
+          const percentDivValue = document.createElement('div');
+          percentDivValue.classList.add('percent-value');
+          percentDivValue.dataset.start = start;
+          percentDivValue.dataset.end = end;
+          percentDiv.appendChild(percentDivValue);
+          rowEl.appendChild(percentDiv);
+        }
+
+        if (row.hasOwnProperty('alarm') && row.alarm !== '') {
+          this.alarms.push(
+            this.formatAlarm(
+              { start: row.start, end: row.end, message: row.alarm },
+              this.config
+            )
+          );
+        }
+
+        cellDiv.appendChild(rowEl);
+        return rowEl;
       }
+    );
 
-      // Prepare progress bar
-      if (this.config.showCurrentProgress) {
-        const percentDiv = document.createElement('div');
-        percentDiv.classList.add('percent-bar');
-        percentDiv.style.backgroundColor = this.config.progressColor;
-
-        const percentDivValue = document.createElement('div');
-        percentDivValue.classList.add('percent-value');
-        percentDivValue.dataset.start = start;
-        percentDivValue.dataset.end = end;
-        percentDiv.appendChild(percentDivValue);
-        rowEl.appendChild(percentDiv);
-      }
-
-      if (row.hasOwnProperty('alarm')) {
-        this.alarms.push(
-          this.formatAlarm(
-            {
-              start: row.start,
-              end: row.end,
-              message: row.alarm,
-            },
-            this.config.timeFormat
-          )
-        );
-      }
-
-      cellDiv.appendChild(rowEl);
-      return rowEl;
-    });
-
-    if (this.config.showCurrent) {
+    if (this.config.showCurrent && this.active) {
       this.setCurrent();
     }
 
-    if (this.alarms.length) {
+    if (this.alarms.length && this.active) {
       this.setAlarms();
     }
 
@@ -209,7 +236,11 @@ Module.register('MMM-Skolschema', {
   getCurrentSchedule: function () {
     const now = new Date();
     const nowMins = H.time2Mins(this.config.timeFormat);
+
+    // Fix to get mon - sun
     const currDayNum = now.getDay() - 1 < 0 ? 6 : now.getDay() - 1;
+    this.currentDay = Object.keys(this.config.schedules[currDayNum])[0];
+
     const thisDayNum =
       nowMins >= this.nextDayMinutes
         ? currDayNum + 1 > 6
@@ -223,60 +254,64 @@ Module.register('MMM-Skolschema', {
         Object.keys(this.config.schedules[thisDayNum])[0]
     )[0];
 
+    if (nowMins === 0) {
+      this.currentDay = Object.keys(this.config.schedules[thisDayNum])[0];
+    }
+
     return schedule;
   },
 
   generateSchedule: function () {
     this.currSchedule = {};
     this.scheduleRows = [];
+    this.scheduleDay = '';
     this.currentDay = '';
+    this.active = false;
     this.alarms = [];
     this.alarmTimer = null;
     this.nextDayMinutes = H.time2Mins(
       this.config.timeFormat,
       this.config.showNextDayAt
     );
-    if (this.alarmTimer) {
-      clearInterval(this.alarmTimer);
-    }
-    if (this.newDayTimer) {
-      clearInterval(this.newDayTimer);
-    }
+    H.resetTimers(this);
 
     const scheduleContent = document.createElement('div');
     scheduleContent.classList.add('MMM-Skolschema__content');
 
     this.currSchedule = this.getCurrentSchedule();
-    this.currentDay = Object.keys(this.currSchedule)[0];
-    let tempDay = this.currentDay;
+    this.scheduleDay = Object.keys(this.currSchedule)[0];
+    let tempDay = this.scheduleDay;
+    this.active = this.currentDay === this.scheduleDay;
 
     const dayEl = document.createElement('div');
     dayEl.classList.add('day', 'bright', 'thin');
 
     if (this.config.showDayname) {
-      dayEl.innerHTML = this.currentDay;
+      dayEl.innerHTML = this.scheduleDay;
       scheduleContent.appendChild(dayEl);
     }
 
     scheduleContent.appendChild(this.getScheduleList());
+    this.getAlarmList();
 
-    // Check if new day
     this.newDayTimer = setInterval(() => {
       this.currSchedule = this.getCurrentSchedule();
-      this.currentDay = Object.keys(this.currSchedule)[0];
+      this.scheduleDay = Object.keys(this.currSchedule)[0];
+      this.active = this.currentDay === this.scheduleDay;
 
-      if (tempDay !== this.currentDay) {
-        // We have a new day
-        tempDay = this.currentDay;
+      if (tempDay !== this.scheduleDay) {
+        // Let's show the next day
+        tempDay = this.scheduleDay;
         scheduleContent.innerHTML = '';
         this.alarms = [];
+        H.resetTimers(this);
 
         if (this.config.showDayname) {
-          dayEl.innerHTML = this.currentDay;
-          scheduleContent.appendChild(dayEl);
+          dayEl.innerHTML = this.scheduleDay;
         }
 
         scheduleContent.appendChild(this.getScheduleList());
+        this.getAlarmList();
       }
     }, 60 * 1000);
 
