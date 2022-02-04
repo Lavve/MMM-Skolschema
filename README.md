@@ -4,9 +4,9 @@ A highly customizable schedule module for [MagicMirror²](https://github.com/Mic
 
 - [Installation](#installation)
 - [Configuration](#configuration)
-    - [Schedule](#schedule)
-      + [Schedule array](#schedule_array)
-      + [Alarm array](#alarm_array)
+    - [Schedules](#schedules)
+      + [Schedule array](#schedule-array)
+      + [Alarm array](#alarm-array)
 - [Example](#example)
 - [Screenshots](#screenshots)
 - [TODO](#todo)
