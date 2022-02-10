@@ -52,7 +52,7 @@ Theese are the nodes that are available to make your magic schedule.
 | `showNextDayAt` | str | `'0:00'` | At what time the next day's schedule will show up |
 | `noScheduleText` | str | `''` | Text shown when schedule for the current day is empty |
 | `progressColor` | str | `'#fff'` | Color of the progress bar |
-| `progressType` | str | `'bar'` | Choose between `bar` below current row, or `pie` chart to the right |
+| `progressType` | str | `'bar'` | Choose between `'bar'` line below current row, or `'pie'` chart to the right |
 | `dividerColor` | str | `'#666'` | Color of the divider |
 | `schedules` | array | `[]` | List of schedules for all day's of the week, see below |
 
@@ -99,9 +99,10 @@ The optional alarm array have the following options
   defaultAlarmEnd: 60,
   showNextDayAt: '20:00',
   showEndTime: true,
-  rowFormat: 'time:label',
-  noScheduleText: 'Inget att göra idag',
+  rowFormat: 'label:time',
+  noScheduleText: 'Inget på schemat',
   progressColor: 'lime',
+  progressType: 'pie',
   dividerColor: '#4b0082',
   schedules: [{
     'Måndag': {
@@ -178,4 +179,4 @@ Pull requests, translations and suggestions for improvements are more than welco
 
 ## Donations
 
-[🍻 Buy me a beer](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=SM9XRXUPPJM84&item_name=%40lavve+MagicMiror+Modules) if you like my modules! ❤
+[🍻 Buy me a beer](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=SM9XRXUPPJM84&item_name=%40lavve+MagicMiror+Modules) if you like [my mm² modules](https://github.com/search?q=user%3ALavve+MMM-)! ❤
