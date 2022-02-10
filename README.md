@@ -74,8 +74,8 @@ The schedule array have the following coptions
 | Node | Type | Example | Optional | Description |
 | --- | --- | --- | --- | --- |
 | `start` | str | `'18:15'` |  | Start time of current schedule row |
-| `end` | str | `'19:25'` | ✓ | End time of current schedule row. If leaving empty string or is excluded, the start time of next row is used. If it's the last row, `'23:59'` or `'11:59 pm'` is used |
 | `label` | str | `'Tennis'` |  | Label of the current schedule row |
+| `end` | str | `'19:25'` | ✓ | End time of current schedule row. If leaving empty string or is excluded, the start time of next row is used. If it's the last row, `'23:59'` or `'11:59 pm'` is used |
 | `divider` | str | `'after'` | ✓ | Show a divider before, after or both of the row. Valid values are `'before'`, `'after'` or `'both'` |
 | `alarm` | str | `''` | ✓ | Enter a alarm message that is shown in time for the current schedule. Uses current row's start and end time |
 
@@ -86,8 +86,8 @@ The optional alarm array have the following options
 | Node | Type | Example | Optional | Description |
 | --- | --- | --- | --- | --- |
 | `start` | str | `'7:30 AM'` |  | Time when alarm shows up |
-| `end` | str | `'8:00 AM'` | ✓ | Time when alarm is hidden. If leaving empty string or is excluded, the alarm will be hidden after what is set in `defaultAlarmEnd` setting above |
 | `message` | str | `'Ta med fiskespöt! 🎣'` |  | Text that is shown in the alarm notification |
+| `end` | str | `'8:00 AM'` | ✓ | Time when alarm is hidden. If leaving empty string or is excluded, the alarm will be hidden after what is set in `defaultAlarmEnd` setting above |
 
 ## Example
 
@@ -106,9 +106,6 @@ The optional alarm array have the following options
   dividerColor: '#4b0082',
   schedules: [{
     'Måndag': {
-      alarms: [
-        { start: '19:00', end: '20:30', message: 'Tvättstuga 🧺' },
-      ],
       schedule: [
         { start: '8:00', end: '8:40', label: 'Musik' },
         { start: '8:40', end: '9:15', label: 'Mattematik', divider: 'below' },
@@ -117,7 +114,10 @@ The optional alarm array have the following options
         { start: '12:00', end: '13:30', label: 'Idrott', alarm: 'Kom ihåg att duscha 🚿' },
         { start: '13:30', end: '14:30', label: 'Engelska' },
         { start: '16:30', end: '17:30', label: 'Simning' },
-      ]
+      ],
+      alarms: [
+        { start: '19:00', end: '20:30', message: 'Tvättstuga 🧺' },
+      ],
     },
     'Tisdag': [],
     'Onsdag': [],
@@ -143,17 +143,17 @@ The optional alarm array have the following options
 
 ### Template
 
-Here's a simple template for the configuration with English day names. Copy this and change it to your language, if preferable.
+Here's a template for the configuration with English day names. Copy this and change it to your language, if preferable.
 
 ```js
 schedules: [
-  Monday: { alarms: [], schedule: [] },
-  Tuesday: { alarms: [], schedule: [] },
-  Wednesday: { alarms: [], schedule: [] },
-  Thursday: { alarms: [], schedule: [] },
-  Friday: { alarms: [], schedule: [] },
-  Saturday: { alarms: [], schedule: [] },
-  Sunday: { alarms: [], schedule: [] },
+  Monday: { schedule: [], alarms: [] },
+  Tuesday: { schedule: [], alarms: [] },
+  Wednesday: { schedule: [], alarms: [] },
+  Thursday: { schedule: [], alarms: [] },
+  Friday: { schedule: [], alarms: [] },
+  Saturday: { schedule: [], alarms: [] },
+  Sunday: { schedule: [], alarms: [] },
 ]
 ```
 
