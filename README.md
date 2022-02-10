@@ -8,6 +8,7 @@ A highly customizable schedule module for [MagicMirror²](https://github.com/Mic
       + [Schedule array](#schedule-array)
       + [Alarm array](#alarm-array)
 - [Example](#example)
+  - [Template](#template)
 - [Screenshots](#screenshots)
 - [TODO](#todo)
 - [Collaborate](#collaborate)
@@ -42,21 +43,22 @@ Theese are the nodes that are available to make your magic schedule.
 | Configuration | Type | Default | Description |
 | --- | --- | --- | --- |
 | `showDayname` | bool | `true` | Show current day name above schedule |
-| `showNextDayAt` | str | `'0:00'` | At what time the next day's schedule will show up |
 | `showEndTime` | bool | `false` | Choose if end time will be shown on each row or not |
 | `showCurrent` | bool | `true` | Decides if the current row will be highlighted |
-| `timeFormat` | int | `[config.timeFormat]` | Uses the time format stated in config.js as default, but can be overridden here if needed. Possible values are `12` or `24` |
-| `defaultAlarmEnd` | int | `2 * 60` | Time in minutes for when an alarm notification is hidden if leaving end time out. Default is set to two (2) hours |
-| `rowFormat` | str | `'time:label'` | Place time to the left or right of the label. `'time:label'` or `'label:time'` are the valid values |
-| `noScheduleText` | str | `''` | Text shown when schedule for the current day is empty |
 | `showCurrentProgress` | bool | `true` | Show a progressbar below current row in the schedule |
+| `timeFormat` | int | `[config.timeFormat]` | Uses the time format stated in config.js as default, but can be overridden here if needed. Possible values are `12` or `24` |
+| `rowFormat` | str | `'time:label'` | Place time to the left or right of the label. `'time:label'` or `'label:time'` are the valid values |
+| `defaultAlarmEnd` | int | `2 * 60` | Time in minutes for when an alarm notification is hidden if leaving end time out. Default is set to two (2) hours |
+| `showNextDayAt` | str | `'0:00'` | At what time the next day's schedule will show up |
+| `noScheduleText` | str | `''` | Text shown when schedule for the current day is empty |
 | `progressColor` | str | `'#fff'` | Color of the progress bar |
+| `progressType` | str | `'bar'` | Choose between `bar` below current row, or `pie` chart to the right |
 | `dividerColor` | str | `'#666'` | Color of the divider |
 | `schedules` | array | `[]` | List of schedules for all day's of the week, see below |
 
 ### Schedules
 
-Configuration for the schedules must include _all days_ in a week, Monday to Sunday (_in that order_), in preferable language. If a day don't have a schedule, an empty array (`[]`) must be set.
+This one is the most importent part. Configuration for the schedules must include _all days_ in a week, Monday to Sunday (_in that order_), in preferable language. If a day don't have a schedule, an empty array (`[]`) must be set.
 
 Each day has two nodes, one optonal for alarms and one mandatory for the schedule
 
@@ -138,6 +140,23 @@ The optional alarm array have the following options
 }
 ```
 
+### Template
+
+Here's a simple template for the configuration with English day names. Copy this and change it to your language, if preferable.
+
+```js
+schedules: [
+  Monday: { alarms: [], schedule: [] },
+  Tuesday: { alarms: [], schedule: [] },
+  Wednesday: { alarms: [], schedule: [] },
+  Thursday: { alarms: [], schedule: [] },
+  Friday: { alarms: [], schedule: [] },
+  Saturday: { alarms: [], schedule: [] },
+  Sunday: { alarms: [], schedule: [] },
+]
+```
+
+
 ## Screenshots
 Screenshots will be provided at a later time
 
@@ -145,6 +164,7 @@ Screenshots will be provided at a later time
 - [ ] Add own alarm notification template
 - [ ] Bug fix for cases when if next day is shown, that schedule's progress and current is shown
 - [x] Adjust time to exact second to match schedule and alarm times
+- [x] Add choise for how progress is shown, `bar` or `pie`
 - [x] Add custom alarm timeout setting
 - [x] Add possibility to add optional alarms for each day, not only on schedule rows
 - [x] Add optional divider on schedule row

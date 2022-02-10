@@ -17,6 +17,7 @@ Module.register('MMM-Skolschema', {
     rowFormat: 'time:label',
     noScheduleText: '',
     showCurrentProgress: true,
+    progressType: 'bar',
     progressColor: '#fff',
     dividerColor: '',
     schedules: [],
@@ -30,8 +31,16 @@ Module.register('MMM-Skolschema', {
     return ['helpers.js'];
   },
 
+  getTranslations: function () {
+    return {
+      en: 'translations/en.json',
+      sv: 'translations/sv.json',
+    };
+  },
+
   start: function () {
     Log.info('Starting module: ' + this.name);
+    this.ready = false;
     this.currentAlarms = [];
     H.sync2Sec(this);
   },
@@ -80,21 +89,21 @@ Module.register('MMM-Skolschema', {
     const nowTime = H.time2Mins(this.config.timeFormat);
 
     this.scheduleRows.forEach((rowEl) => {
-      const progressBar = rowEl.querySelector('.percent-bar');
+      const progressEl = rowEl.querySelector('.schedule-progress');
 
       if (nowTime >= rowEl.dataset.start && nowTime < rowEl.dataset.end) {
         rowEl.classList.add('bright');
 
         if (this.config.showCurrentProgress) {
-          if (progressBar) {
-            progressBar.style.display = 'block';
+          if (progressEl) {
+            progressEl.style.display = 'block';
           }
-          H.setProgress(rowEl, nowTime);
+          H.setProgress(rowEl, nowTime, this);
         }
       } else {
         rowEl.classList.remove('bright');
-        if (progressBar) {
-          progressBar.style.display = 'none';
+        if (progressEl) {
+          progressEl.style.display = 'none';
         }
       }
     });
@@ -104,17 +113,9 @@ Module.register('MMM-Skolschema', {
     }, 60 * 1000);
   },
 
-  unsetCurrent: function () {
-    this.scheduleRows.forEach((rowEl) => {
-      const progressBar = rowEl.querySelector('.percent-bar');
-      rowEl.classList.remove('bright');
-      if (progressBar) {
-        progressBar.style.display = 'none';
-      }
-    });
-  },
-
   getAlarmList: function () {
+    this.alarms = [];
+
     if (
       this.currSchedule[this.scheduleDay].hasOwnProperty('alarms') &&
       this.currSchedule[this.scheduleDay].alarms.length
@@ -130,6 +131,32 @@ Module.register('MMM-Skolschema', {
         }
       });
     }
+
+    if (this.alarms.length && this.active) {
+      this.setAlarms();
+    }
+  },
+
+  getProgress: function (start, end) {
+    const progressEl = document.createElement('div');
+    progressEl.classList.add('schedule-progress');
+    progressEl.dataset.start = start;
+    progressEl.dataset.end = end;
+
+    if (this.config.progressType === 'bar') {
+      progressEl.classList.add('percent-bar');
+      progressEl.style.backgroundColor = this.config.progressColor;
+
+      const progresValue = document.createElement('div');
+      progresValue.classList.add('percent-value');
+
+      progressEl.appendChild(progresValue);
+    } else {
+      progressEl.classList.add('percent-pie');
+      // progressEl.style.borderColor = this.config.progressColor;
+    }
+
+    return progressEl;
   },
 
   getScheduleList: function () {
@@ -195,16 +222,7 @@ Module.register('MMM-Skolschema', {
 
         // Prepare progress bar
         if (this.config.showCurrentProgress) {
-          const percentDiv = document.createElement('div');
-          percentDiv.classList.add('percent-bar');
-          percentDiv.style.backgroundColor = this.config.progressColor;
-
-          const percentDivValue = document.createElement('div');
-          percentDivValue.classList.add('percent-value');
-          percentDivValue.dataset.start = start;
-          percentDivValue.dataset.end = end;
-          percentDiv.appendChild(percentDivValue);
-          rowEl.appendChild(percentDiv);
+          rowEl.appendChild(this.getProgress(start, end));
         }
 
         if (row.hasOwnProperty('alarm') && row.alarm !== '') {
@@ -223,10 +241,6 @@ Module.register('MMM-Skolschema', {
 
     if (this.config.showCurrent && this.active) {
       this.setCurrent();
-    }
-
-    if (this.alarms.length && this.active) {
-      this.setAlarms();
     }
 
     cellDiv.classList.add('schedule-rows');
@@ -254,8 +268,11 @@ Module.register('MMM-Skolschema', {
         Object.keys(this.config.schedules[thisDayNum])[0]
     )[0];
 
-    if (nowMins === 0) {
-      this.currentDay = Object.keys(this.config.schedules[thisDayNum])[0];
+    if (nowMins === 1) {
+      this.scheduleDay = Object.keys(this.config.schedules[thisDayNum])[0];
+
+      this.getAlarmList();
+      H.resetTimers(this);
     }
 
     return schedule;
@@ -303,15 +320,12 @@ Module.register('MMM-Skolschema', {
         // Let's show the next day
         tempDay = this.scheduleDay;
         scheduleContent.innerHTML = '';
-        this.alarms = [];
-        H.resetTimers(this);
 
         if (this.config.showDayname) {
           dayEl.innerHTML = this.scheduleDay;
         }
 
         scheduleContent.appendChild(this.getScheduleList());
-        this.getAlarmList();
       }
     }, 60 * 1000);
 
@@ -320,6 +334,13 @@ Module.register('MMM-Skolschema', {
 
   getDom: function () {
     const w = document.createElement('div');
+
+    if (!this.ready) {
+      w.classList.add('dimmed');
+      w.innerHTML = this.translate('loading');
+      return w;
+    }
+
     w.appendChild(this.generateSchedule());
     return w;
   },

@@ -24,13 +24,32 @@ const H = {
     }
   },
 
-  setProgress: function (rowEl, nowTime) {
-    const progressEl = rowEl.querySelector('.percent-value');
+  setProgress: function (rowEl, nowTime, that) {
+    const progressEl = rowEl.querySelector('.schedule-progress');
     const start = progressEl.dataset.start;
     const end = progressEl.dataset.end;
-    const percent = Math.round(100 - (100 * (nowTime - start)) / (end - start));
+    let percent = 0;
+    let deg = 0;
 
-    progressEl.style.width = percent + '%';
+    if (that.config.progressType === 'bar') {
+      const progressVal = rowEl.querySelector('.percent-value');
+      percent = Math.round(100 - (100 * (nowTime - start)) / (end - start));
+      progressVal.style.width = percent + '%';
+    } else {
+      percent = Math.round((100 * (nowTime - start)) / (end - start));
+      let style = '';
+
+      if (percent >= 50) {
+        deg = Math.round(percent * 3.6) - 360 + 90;
+        style = `linear-gradient(${deg}deg, ${that.config.progressColor} 50%, transparent 50%)`;
+      } else {
+        deg = Math.round(percent * 3.6) - 90;
+        style = `linear-gradient(${deg}deg, var(--color-background) 50%, transparent 50%)`;
+      }
+
+      style += `,linear-gradient(-90deg, ${that.config.progressColor} 50%, transparent 50%)`;
+      progressEl.style.backgroundImage = style;
+    }
   },
 
   formatAlarm: function (alarm, config) {
@@ -57,6 +76,7 @@ const H = {
         console.log(`${that.name} :: Time is synced`);
         clearInterval(syncTimer);
         this.resetTimers(that);
+        that.ready = true;
         that.updateDom();
       }
     }, 1000);
