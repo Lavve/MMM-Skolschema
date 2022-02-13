@@ -1,11 +1,3 @@
-.ns-box {
-  background: #dd4f4f;
-}
-
-.ns-box .light {
-  font-weight: 600;
-}
-
 .MMM-Skolschema__content .day {
   text-align: center;
   padding: 0 0 0.5rem;
@@ -20,6 +12,11 @@
   justify-content: space-between;
   flex-flow: row wrap;
   align-items: baseline;
+}
+
+.MMM-Skolschema__content .schedule-row .schedule-time .far {
+  margin-left: 0.25rem;
+  font-size: 0.5rem;
 }
 
 .MMM-Skolschema__content .schedule-row.divider-before {
@@ -84,4 +81,27 @@
 
 .MMM-Skolschema__content .row .no-schedule {
   text-align: center;
+}
+
+.MMM-Skolschema__alarms {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.MMM-Skolschema__alarms .MMM-Skolschema-alarm {
+  margin: 0.25rem auto;
+  padding: 0.5rem 1rem;
+}
+
+.MMM-Skolschema__alarms .schedule_alarm-content {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+}
+
+.MMM-Skolschema__alarms .MMM-Skolschema-alarm .fa {
+  width: 20px;
+  margin-right: 0.5rem;
 }

@@ -52,9 +52,31 @@ const H = {
     }
   },
 
+  getProgress: function (config, start, end) {
+    const progressEl = document.createElement('div');
+    progressEl.classList.add('schedule-progress');
+    progressEl.dataset.start = start;
+    progressEl.dataset.end = end;
+
+    if (config.progressType === 'bar') {
+      progressEl.classList.add('percent-bar');
+      progressEl.style.backgroundColor = config.progressColor;
+
+      const progresValue = document.createElement('div');
+      progresValue.classList.add('percent-value');
+
+      progressEl.appendChild(progresValue);
+    } else {
+      progressEl.classList.add('percent-pie');
+    }
+
+    return progressEl;
+  },
+
   formatAlarm: function (alarm, config) {
     const convert = {};
     convert.start = this.time2Mins(config.timeFormat, alarm.start);
+    convert.alarmIcon = '';
 
     if (alarm.hasOwnProperty('end')) {
       convert.end = this.time2Mins(config.timeFormat, alarm.end);
@@ -65,6 +87,15 @@ const H = {
         config.defaultAlarmEnd
       );
     }
+
+    if (config.defaultAlarmIcon !== '') {
+      convert.alarmIcon = config.defaultAlarmIcon;
+    }
+
+    if (alarm.hasOwnProperty('alarmIcon')) {
+      convert.alarmIcon = alarm.alarmIcon;
+    }
+
     convert.message = alarm.message;
     return convert;
   },
@@ -73,7 +104,7 @@ const H = {
     const syncTimer = setInterval(() => {
       const now = new Date();
       if (now.getSeconds() === 0) {
-        console.log(`${that.name} :: Time is synced`);
+        console.log(`${that.name} :: Time syncronized`);
         clearInterval(syncTimer);
         this.resetTimers(that);
         that.ready = true;

@@ -14,6 +14,9 @@ Module.register('MMM-Skolschema', {
     showCurrent: true,
     timeFormat: config.timeFormat,
     defaultAlarmEnd: 2 * 60,
+    alarmBackground: '#fff',
+    alarmTextColor: '#000',
+    defaultAlarmIcon: 'fa-bell',
     rowFormat: 'time:label',
     noScheduleText: '',
     showCurrentProgress: true,
@@ -41,34 +44,47 @@ Module.register('MMM-Skolschema', {
   start: function () {
     Log.info('Starting module: ' + this.name);
     this.ready = false;
-    this.currentAlarms = [];
     H.sync2Sec(this);
   },
 
   setAlarmNotice: function (alarm, i) {
     const nowTime = H.time2Mins(this.config.timeFormat);
     const alarmStart = nowTime > alarm.start ? nowTime : alarm.start;
+    const alarmEnd =
+      alarm.hasOwnProperty('end') && alarm.end !== ''
+        ? alarm.end
+        : alarm.start + this.config.defaultAlarmEnd;
 
-    let alarmEnd = 0;
-    if (alarm.hasOwnProperty('end') && alarm.end !== '') {
-      alarmEnd = alarm.end;
-    } else {
-      alarmEnd = alarm.start + 120;
-    }
-    const timerMs = (alarmEnd - alarmStart) * 60 * 1000;
+    if (nowTime >= alarmStart && nowTime < alarmEnd) {
+      this.a[i] = document.querySelector('#schedule_alarm-' + i);
 
-    if (nowTime >= alarmStart && nowTime < alarmEnd && timerMs > 0) {
-      if (!this.currentAlarms.includes('alarm-' + i)) {
-        this.currentAlarms.push('alarm-' + i);
-        this.sendNotification(
-          'SHOW_ALERT',
-          { type: 'notification', timer: timerMs, message: alarm.message },
-          'alarm-' + i
-        );
+      if (!this.a[i]) {
+        this.a[i] = document.createElement('div');
+        this.a[i].id = 'schedule_alarm-' + i;
+        this.a[i].classList.add('MMM-Skolschema-alarm', 'ns-box');
+        this.a[i].style.backgroundColor = this.config.alarmBackground;
+        this.a[i].style.color = this.config.alarmTextColor;
+
+        const alarmContent = document.createElement('div');
+        alarmContent.classList.add('schedule_alarm-content', 'small');
+        alarmContent.innerHTML = alarm.message;
+
+        const icon = document.createElement('span');
+
+        if (alarm.alarmIcon !== '') {
+          icon.classList.add('fa', alarm.alarmIcon);
+        }
+
+        alarmContent.prepend(icon);
+        this.a[i].appendChild(alarmContent);
+        this.alarmBlock.appendChild(this.a[i]);
       }
     } else {
-      this.currentAlarms = this.currentAlarms.filter((c) => c !== 'alarm-' + i);
-      this.sendNotification('HIDE_ALERT', 'alarm-' + i);
+      this.a = this.a.filter((c) => c.id !== 'schedule_alarm-' + i);
+      const alarmEl = document.querySelector('#schedule_alarm-' + i);
+      if (alarmEl) {
+        alarmEl.remove();
+      }
     }
   },
 
@@ -81,7 +97,7 @@ Module.register('MMM-Skolschema', {
       this.setAlarmNotice(alarm, i);
       this.alarmTimer = setInterval(() => {
         this.setAlarmNotice(alarm, i);
-      }, this.config.alarmInterval);
+      }, 60 * 1000);
     });
   },
 
@@ -89,9 +105,14 @@ Module.register('MMM-Skolschema', {
     const nowTime = H.time2Mins(this.config.timeFormat);
 
     this.scheduleRows.forEach((rowEl) => {
+      const start = parseInt(rowEl.dataset.start, 10);
+      const end = parseInt(rowEl.dataset.end, 10);
       const progressEl = rowEl.querySelector('.schedule-progress');
+      const alarmEl = rowEl.querySelector('.far');
 
-      if (nowTime >= rowEl.dataset.start && nowTime < rowEl.dataset.end) {
+      console.log(start, end, nowTime);
+
+      if (start <= nowTime && nowTime < end) {
         rowEl.classList.add('bright');
 
         if (this.config.showCurrentProgress) {
@@ -100,6 +121,9 @@ Module.register('MMM-Skolschema', {
           }
           H.setProgress(rowEl, nowTime, this);
         }
+      } else if (nowTime >= end) {
+        alarmEl.classList.remove('fa-bell');
+        alarmEl.classList.add('fa-bell-slash');
       } else {
         rowEl.classList.remove('bright');
         if (progressEl) {
@@ -114,8 +138,6 @@ Module.register('MMM-Skolschema', {
   },
 
   getAlarmList: function () {
-    this.alarms = [];
-
     if (
       this.currSchedule[this.scheduleDay].hasOwnProperty('alarms') &&
       this.currSchedule[this.scheduleDay].alarms.length
@@ -133,30 +155,11 @@ Module.register('MMM-Skolschema', {
     }
 
     if (this.alarms.length && this.active) {
+      this.alarmBlock = document.createElement('div');
+      this.alarmBlock.classList.add('MMM-Skolschema__alarms');
+      document.body.appendChild(this.alarmBlock);
       this.setAlarms();
     }
-  },
-
-  getProgress: function (start, end) {
-    const progressEl = document.createElement('div');
-    progressEl.classList.add('schedule-progress');
-    progressEl.dataset.start = start;
-    progressEl.dataset.end = end;
-
-    if (this.config.progressType === 'bar') {
-      progressEl.classList.add('percent-bar');
-      progressEl.style.backgroundColor = this.config.progressColor;
-
-      const progresValue = document.createElement('div');
-      progresValue.classList.add('percent-value');
-
-      progressEl.appendChild(progresValue);
-    } else {
-      progressEl.classList.add('percent-pie');
-      // progressEl.style.borderColor = this.config.progressColor;
-    }
-
-    return progressEl;
   },
 
   getScheduleList: function () {
@@ -180,7 +183,6 @@ Module.register('MMM-Skolschema', {
 
         const timeEl = document.createElement('span');
         timeEl.classList.add('schedule-time', 'thin', 'xsmall');
-        let timeContent = row.start;
 
         if (!row.hasOwnProperty('end') || row.end === '') {
           row.end =
@@ -189,10 +191,13 @@ Module.register('MMM-Skolschema', {
               : '23:59';
         }
 
+        let timeContent = row.start;
         if (this.config.showEndTime) {
           timeContent += ` &ndash; ${row.end}`;
         }
         timeEl.innerHTML = timeContent;
+        const alarmEl = document.createElement('span');
+        timeEl.appendChild(alarmEl);
 
         const labelEl = document.createElement('span');
         labelEl.classList.add('schedule-label');
@@ -215,6 +220,7 @@ Module.register('MMM-Skolschema', {
 
         if (row.hasOwnProperty('divider') && row.divider !== '') {
           rowEl.classList.add(`divider-${row.divider}`);
+
           if (this.config.dividerColor !== '') {
             rowEl.style.borderColor = this.config.dividerColor;
           }
@@ -222,12 +228,18 @@ Module.register('MMM-Skolschema', {
 
         // Prepare progress bar
         if (this.config.showCurrentProgress) {
-          rowEl.appendChild(this.getProgress(start, end));
+          rowEl.appendChild(H.getProgress(this.config, start, end));
         }
 
         if (row.hasOwnProperty('alarm') && row.alarm !== '') {
+          if (H.time2Mins(this.config.timeFormat) <= end) {
+            alarmEl.classList.add('far', 'fa-bell');
+          } else {
+            alarmEl.classList.add('far', 'fa-bell-slash');
+          }
+
           this.alarms.push(
-            this.formatAlarm(
+            H.formatAlarm(
               { start: row.start, end: row.end, message: row.alarm },
               this.config
             )
@@ -247,7 +259,7 @@ Module.register('MMM-Skolschema', {
     return cellDiv;
   },
 
-  getCurrentSchedule: function () {
+  getSchedule: function () {
     const now = new Date();
     const nowMins = H.time2Mins(this.config.timeFormat);
 
@@ -268,17 +280,15 @@ Module.register('MMM-Skolschema', {
         Object.keys(this.config.schedules[thisDayNum])[0]
     )[0];
 
-    if (nowMins === 1) {
-      this.scheduleDay = Object.keys(this.config.schedules[thisDayNum])[0];
-
-      this.getAlarmList();
-      H.resetTimers(this);
+    if (nowMins === 0) {
+      this.updateDom(0);
     }
 
     return schedule;
   },
 
   generateSchedule: function () {
+    this.a = [];
     this.currSchedule = {};
     this.scheduleRows = [];
     this.scheduleDay = '';
@@ -295,7 +305,7 @@ Module.register('MMM-Skolschema', {
     const scheduleContent = document.createElement('div');
     scheduleContent.classList.add('MMM-Skolschema__content');
 
-    this.currSchedule = this.getCurrentSchedule();
+    this.currSchedule = this.getSchedule();
     this.scheduleDay = Object.keys(this.currSchedule)[0];
     let tempDay = this.scheduleDay;
     this.active = this.currentDay === this.scheduleDay;
@@ -312,7 +322,7 @@ Module.register('MMM-Skolschema', {
     this.getAlarmList();
 
     this.newDayTimer = setInterval(() => {
-      this.currSchedule = this.getCurrentSchedule();
+      this.currSchedule = this.getSchedule();
       this.scheduleDay = Object.keys(this.currSchedule)[0];
       this.active = this.currentDay === this.scheduleDay;
 
@@ -336,8 +346,19 @@ Module.register('MMM-Skolschema', {
     const w = document.createElement('div');
 
     if (!this.ready) {
-      w.classList.add('dimmed');
-      w.innerHTML = this.translate('loading');
+      let s = 59 - new Date().getSeconds();
+      const countEl = document.createElement('span');
+      let so = s;
+      countEl.innerHTML = so;
+
+      setInterval(() => {
+        so = so > 0 ? s-- : 0;
+        countEl.innerHTML = ' ' + so;
+      }, 1000);
+
+      w.classList.add('dimmed', 'xsmall');
+      w.innerHTML = this.translate('wait');
+      w.appendChild(countEl);
       return w;
     }
 
