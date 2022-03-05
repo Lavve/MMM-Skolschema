@@ -16,11 +16,7 @@ const H = {
 
       return h * 60 + m + addMins;
     } else {
-      return (
-        parseInt(time.split(':')[0], 10) * 60 +
-        parseInt(time.split(':')[1], 10) +
-        addMins
-      );
+      return parseInt(time.split(':')[0], 10) * 60 + parseInt(time.split(':')[1], 10) + addMins;
     }
   },
 
@@ -81,11 +77,7 @@ const H = {
     if (alarm.hasOwnProperty('end')) {
       convert.end = this.time2Mins(config.timeFormat, alarm.end);
     } else {
-      convert.end = this.time2Mins(
-        config.timeFormat,
-        alarm.start,
-        config.defaultAlarmEnd
-      );
+      convert.end = this.time2Mins(config.timeFormat, alarm.start, config.defaultAlarmEnd);
     }
 
     if (config.defaultAlarmIcon !== '') {
@@ -100,7 +92,7 @@ const H = {
     return convert;
   },
 
-  sync2Sec: function (that) {
+  sync: function (that) {
     const syncTimer = setInterval(() => {
       const now = new Date();
       if (now.getSeconds() === 0) {

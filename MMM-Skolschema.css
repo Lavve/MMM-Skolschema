@@ -85,6 +85,7 @@
 
 .MMM-Skolschema__alarms {
   position: absolute;
+  z-index: 55;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -93,6 +94,7 @@
 .MMM-Skolschema__alarms .MMM-Skolschema-alarm {
   margin: 0.25rem auto;
   padding: 0.5rem 1rem;
+  border-width: 2px;
 }
 
 .MMM-Skolschema__alarms .schedule_alarm-content {

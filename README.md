@@ -51,6 +51,7 @@ Theese are the nodes that are available to make your magic schedule.
 | `defaultAlarmEnd` | int | `2 * 60` | Time in minutes for when an alarm notification is hidden if no end time is set. Default is set to 120 minutes (2 hours) |
 | alarmBackground | str | `'#fff'` | Alarm notice background color |
 | alarmTextColor | str | `'#000'` | Alarm notice text color |
+| alarmBorderColor | str | `'#999'` | Alarm notice border color |
 | defaultAlarmIcon | str | `'fa-bell'` | Set a default icon for the alarm notification. If setting an empty string (`''`) no icon will be shown as default, unless icon is set in the alarm, see below. Available icons can be found at the [Font Awesome website](https://fontawesome.com/v5/search?m=free) |
 | `showNextDayAt` | str | `'0:00'` | At what time the next day's schedule will show up |
 | `noScheduleText` | str | `''` | Text shown when schedule for the current day is empty |
@@ -138,7 +139,7 @@ The optional alarm array have the following options
         { start: '10:00', end: '11:30', label: 'Ishockey' },
        ],
        alarms: [
-         { start: '9:30', end: '10:00', message: 'Kom ihåg att ta med racket', alarmIcon: 'hockey-puck' },
+         { start: '9:30', end: '10:00', message: 'Kom ihåg att ta med hockeyklubban', alarmIcon: 'hockey-puck' },
        ],
     },
     'Söndag': { schedule: [], alarms: [] },
@@ -169,10 +170,10 @@ Screenshots will be provided at a later time
 
 ## TODO
 
-- [x] Add own alarm notification template
+- [x] Add own alarm notification template instead of using mm²'s notification module
 - [x] Bug fix for cases when if next day is shown, that schedule's progress and current is shown
 - [x] Adjust time to exact second to match schedule and alarm times
-- [x] Add choise for how progress is shown, `bar` or `pie`
+- [x] Add choise for how progress is shown, `'bar'` or `'pie'`
 - [x] Add custom alarm timeout setting
 - [x] Add possibility to add optional alarms for each day, not only on schedule rows
 - [x] Add optional divider on schedule row

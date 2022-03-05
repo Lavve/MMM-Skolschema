@@ -16,6 +16,7 @@ Module.register('MMM-Skolschema', {
     defaultAlarmEnd: 2 * 60,
     alarmBackground: '#fff',
     alarmTextColor: '#000',
+    alarmBorderColor: '#999',
     defaultAlarmIcon: 'fa-bell',
     rowFormat: 'time:label',
     noScheduleText: '',
@@ -34,17 +35,14 @@ Module.register('MMM-Skolschema', {
     return ['helpers.js'];
   },
 
-  getTranslations: function () {
-    return {
-      en: 'translations/en.json',
-      sv: 'translations/sv.json',
-    };
-  },
-
   start: function () {
     Log.info('Starting module: ' + this.name);
-    this.ready = false;
-    H.sync2Sec(this);
+
+    this.alarmBlock = document.createElement('div');
+    this.alarmBlock.classList.add('MMM-Skolschema__alarms');
+    document.body.appendChild(this.alarmBlock);
+    this.ready = !1;
+    H.sync(this);
   },
 
   setAlarmNotice: function (alarm, i) {
@@ -63,6 +61,7 @@ Module.register('MMM-Skolschema', {
         this.a[i].id = 'schedule_alarm-' + i;
         this.a[i].classList.add('MMM-Skolschema-alarm', 'ns-box');
         this.a[i].style.backgroundColor = this.config.alarmBackground;
+        this.a[i].style.borderColor = this.config.alarmBorderColor;
         this.a[i].style.color = this.config.alarmTextColor;
 
         const alarmContent = document.createElement('div');
@@ -110,8 +109,6 @@ Module.register('MMM-Skolschema', {
       const progressEl = rowEl.querySelector('.schedule-progress');
       const alarmEl = rowEl.querySelector('.far');
 
-      console.log(start, end, nowTime);
-
       if (start <= nowTime && nowTime < end) {
         rowEl.classList.add('bright');
 
@@ -121,9 +118,13 @@ Module.register('MMM-Skolschema', {
           }
           H.setProgress(rowEl, nowTime, this);
         }
-      } else if (nowTime >= end) {
+      } else if (nowTime >= end && alarmEl) {
         alarmEl.classList.remove('fa-bell');
         alarmEl.classList.add('fa-bell-slash');
+        rowEl.classList.remove('bright');
+        if (progressEl) {
+          progressEl.style.display = 'none';
+        }
       } else {
         rowEl.classList.remove('bright');
         if (progressEl) {
@@ -155,9 +156,6 @@ Module.register('MMM-Skolschema', {
     }
 
     if (this.alarms.length && this.active) {
-      this.alarmBlock = document.createElement('div');
-      this.alarmBlock.classList.add('MMM-Skolschema__alarms');
-      document.body.appendChild(this.alarmBlock);
       this.setAlarms();
     }
   },
@@ -176,80 +174,73 @@ Module.register('MMM-Skolschema', {
 
     const rowLength = this.currSchedule[this.scheduleDay].schedule.length;
 
-    this.scheduleRows = this.currSchedule[this.scheduleDay].schedule.map(
-      (row, i) => {
-        const rowEl = document.createElement('div');
-        rowEl.classList.add('schedule-row');
+    this.scheduleRows = this.currSchedule[this.scheduleDay].schedule.map((row, i) => {
+      const rowEl = document.createElement('div');
+      rowEl.classList.add('schedule-row');
 
-        const timeEl = document.createElement('span');
-        timeEl.classList.add('schedule-time', 'thin', 'xsmall');
+      const timeEl = document.createElement('span');
+      timeEl.classList.add('schedule-time', 'thin', 'xsmall');
 
-        if (!row.hasOwnProperty('end') || row.end === '') {
-          row.end =
-            i !== rowLength - 1
-              ? this.currSchedule[this.scheduleDay].schedule[i + 1].start
-              : '23:59';
-        }
-
-        let timeContent = row.start;
-        if (this.config.showEndTime) {
-          timeContent += ` &ndash; ${row.end}`;
-        }
-        timeEl.innerHTML = timeContent;
-        const alarmEl = document.createElement('span');
-        timeEl.appendChild(alarmEl);
-
-        const labelEl = document.createElement('span');
-        labelEl.classList.add('schedule-label');
-        labelEl.innerHTML = row.label;
-
-        if (this.config.rowFormat === 'label:time') {
-          rowEl.classList.add('mirror');
-          rowEl.appendChild(labelEl);
-          rowEl.appendChild(timeEl);
-        } else {
-          rowEl.appendChild(timeEl);
-          rowEl.appendChild(labelEl);
-        }
-
-        const start = H.time2Mins(this.config.timeFormat, row.start);
-        const end = H.time2Mins(this.config.timeFormat, row.end);
-
-        rowEl.dataset.start = start;
-        rowEl.dataset.end = end;
-
-        if (row.hasOwnProperty('divider') && row.divider !== '') {
-          rowEl.classList.add(`divider-${row.divider}`);
-
-          if (this.config.dividerColor !== '') {
-            rowEl.style.borderColor = this.config.dividerColor;
-          }
-        }
-
-        // Prepare progress bar
-        if (this.config.showCurrentProgress) {
-          rowEl.appendChild(H.getProgress(this.config, start, end));
-        }
-
-        if (row.hasOwnProperty('alarm') && row.alarm !== '') {
-          if (H.time2Mins(this.config.timeFormat) <= end) {
-            alarmEl.classList.add('far', 'fa-bell');
-          } else {
-            alarmEl.classList.add('far', 'fa-bell-slash');
-          }
-
-          this.alarms.push(
-            H.formatAlarm(
-              { start: row.start, end: row.end, message: row.alarm },
-              this.config
-            )
-          );
-        }
-
-        cellDiv.appendChild(rowEl);
-        return rowEl;
+      if (!row.hasOwnProperty('end') || row.end === '') {
+        row.end =
+          i !== rowLength - 1 ? this.currSchedule[this.scheduleDay].schedule[i + 1].start : '23:59';
       }
-    );
+
+      let timeContent = row.start;
+      if (this.config.showEndTime) {
+        timeContent += ` &ndash; ${row.end}`;
+      }
+      timeEl.innerHTML = timeContent;
+      const alarmEl = document.createElement('span');
+      timeEl.appendChild(alarmEl);
+
+      const labelEl = document.createElement('span');
+      labelEl.classList.add('schedule-label');
+      labelEl.innerHTML = row.label;
+
+      if (this.config.rowFormat === 'label:time') {
+        rowEl.classList.add('mirror');
+        rowEl.appendChild(labelEl);
+        rowEl.appendChild(timeEl);
+      } else {
+        rowEl.appendChild(timeEl);
+        rowEl.appendChild(labelEl);
+      }
+
+      const start = H.time2Mins(this.config.timeFormat, row.start);
+      const end = H.time2Mins(this.config.timeFormat, row.end);
+
+      rowEl.dataset.start = start;
+      rowEl.dataset.end = end;
+
+      if (row.hasOwnProperty('divider') && row.divider !== '') {
+        rowEl.classList.add(`divider-${row.divider}`);
+
+        if (this.config.dividerColor !== '') {
+          rowEl.style.borderColor = this.config.dividerColor;
+        }
+      }
+
+      // Prepare progress bar
+      if (this.config.showCurrentProgress && this.active) {
+        rowEl.appendChild(H.getProgress(this.config, start, end));
+      }
+
+      if (row.hasOwnProperty('alarm') && row.alarm !== '') {
+        if (H.time2Mins(this.config.timeFormat) <= end) {
+          alarmEl.classList.add('far', 'fa-bell');
+        } else {
+          alarmEl.classList.add('far', 'fa-bell-slash');
+        }
+
+        this.alarms.push(
+          H.formatAlarm({ start: row.start, end: row.end, message: row.alarm }, this.config)
+        );
+      }
+
+      cellDiv.appendChild(rowEl);
+      return rowEl;
+    });
 
     if (this.config.showCurrent && this.active) {
       this.setCurrent();
@@ -260,27 +251,22 @@ Module.register('MMM-Skolschema', {
   },
 
   getSchedule: function () {
-    const now = new Date();
     const nowMins = H.time2Mins(this.config.timeFormat);
 
     // Fix to get mon - sun
+    const now = new Date();
     const currDayNum = now.getDay() - 1 < 0 ? 6 : now.getDay() - 1;
     this.currentDay = Object.keys(this.config.schedules[currDayNum])[0];
 
     const thisDayNum =
-      nowMins >= this.nextDayMinutes
-        ? currDayNum + 1 > 6
-          ? 0
-          : currDayNum + 1
-        : currDayNum;
+      nowMins >= this.nextDayMinutes ? (currDayNum + 1 > 6 ? 0 : currDayNum + 1) : currDayNum;
 
     const schedule = this.config.schedules.filter(
-      (item) =>
-        Object.keys(item)[0] ===
-        Object.keys(this.config.schedules[thisDayNum])[0]
+      (item) => Object.keys(item)[0] === Object.keys(this.config.schedules[thisDayNum])[0]
     )[0];
 
-    if (nowMins === 0) {
+    if (nowMins === 1) {
+      this.alarmBlock.innerHTML = '';
       this.updateDom(0);
     }
 
@@ -296,10 +282,7 @@ Module.register('MMM-Skolschema', {
     this.active = false;
     this.alarms = [];
     this.alarmTimer = null;
-    this.nextDayMinutes = H.time2Mins(
-      this.config.timeFormat,
-      this.config.showNextDayAt
-    );
+    this.nextDayMinutes = H.time2Mins(this.config.timeFormat, this.config.showNextDayAt);
     H.resetTimers(this);
 
     const scheduleContent = document.createElement('div');
@@ -344,23 +327,6 @@ Module.register('MMM-Skolschema', {
 
   getDom: function () {
     const w = document.createElement('div');
-
-    if (!this.ready) {
-      let s = 59 - new Date().getSeconds();
-      const countEl = document.createElement('span');
-      let so = s;
-      countEl.innerHTML = so;
-
-      setInterval(() => {
-        so = so > 0 ? s-- : 0;
-        countEl.innerHTML = ' ' + so;
-      }, 1000);
-
-      w.classList.add('dimmed', 'xsmall');
-      w.innerHTML = this.translate('wait');
-      w.appendChild(countEl);
-      return w;
-    }
 
     w.appendChild(this.generateSchedule());
     return w;
