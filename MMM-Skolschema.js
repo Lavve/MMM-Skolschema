@@ -25,6 +25,7 @@ Module.register('MMM-Skolschema', {
     progressColor: '#fff',
     dividerColor: '',
     schedules: [],
+    useTTS: false,
   },
 
   getStyles: function () {
@@ -72,6 +73,10 @@ Module.register('MMM-Skolschema', {
 
         if (alarm.alarmIcon !== '') {
           icon.classList.add('fa', alarm.alarmIcon);
+        }
+
+        if (this.config.useTTS) {
+          this.sendNotification('TTS_SAY', alarm.message);
         }
 
         alarmContent.prepend(icon);

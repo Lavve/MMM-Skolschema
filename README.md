@@ -18,7 +18,7 @@ A highly customizable schedule module for [MagicMirror²](https://github.com/Mic
 
 1. Clone this repository into your modules folder
 
-```
+```sh
 cd ~/MagicMirror/modules
 git clone https://github.com/Lavve/MMM-Skolschema
 ```
@@ -49,10 +49,11 @@ Theese are the nodes that are available to make your magic schedule.
 | `timeFormat` | int | `[config.timeFormat]` | Uses the time format stated in config.js as default, but can be overridden here if needed. Possible values are `12` or `24` |
 | `rowFormat` | str | `'time:label'` | Place time to the left or right of the label. `'time:label'` or `'label:time'` are the valid values |
 | `defaultAlarmEnd` | int | `2 * 60` | Time in minutes for when an alarm notification is hidden if no end time is set. Default is set to 120 minutes (2 hours) |
-| alarmBackground | str | `'#fff'` | Alarm notice background color |
-| alarmTextColor | str | `'#000'` | Alarm notice text color |
-| alarmBorderColor | str | `'#999'` | Alarm notice border color |
-| defaultAlarmIcon | str | `'fa-bell'` | Set a default icon for the alarm notification. If setting an empty string (`''`) no icon will be shown as default, unless icon is set in the alarm, see below. Available icons can be found at the [Font Awesome website](https://fontawesome.com/v5/search?m=free) |
+| `alarmBackground` | str | `'#fff'` | Alarm notice background color |
+| `alarmTextColor` | str | `'#000'` | Alarm notice text color |
+| `alarmBorderColor` | str | `'#999'` | Alarm notice border color |
+| `defaultAlarmIcon` | str | `'fa-bell'` | Set a default icon for the alarm notification. If setting an empty string (`''`) no icon will be shown as default, unless icon is set in the alarm, see below. Available icons can be found at the [Font Awesome website](https://fontawesome.com/v5/search?m=free) |
+| `useTTS` | bool | `false` | If you're using the [MMM-GoogleTTS module](https://github.com/MMRIZE/MMM-GoogleTTS) set this to `true` if you want Google to say the alarm label at the specified alarm time |
 | `showNextDayAt` | str | `'0:00'` | At what time the next day's schedule will show up |
 | `noScheduleText` | str | `''` | Text shown when schedule for the current day is empty |
 | `progressColor` | str | `'#fff'` | Color of the progress bar |
@@ -149,7 +150,7 @@ The optional alarm array have the following options
 
 ### Template
 
-Here's a template for the configuration with English day names. Copy this and change it to your language, if preferable.
+Here's a template for the configuration with English day names. Copy this and change the name sof the days to your preferable language
 
 ```js
 schedules: [
