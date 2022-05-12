@@ -69,29 +69,6 @@ const H = {
     return progressEl;
   },
 
-  formatAlarm: function (alarm, config) {
-    const convert = {};
-    convert.start = this.time2Mins(config.timeFormat, alarm.start);
-    convert.alarmIcon = '';
-
-    if (alarm.hasOwnProperty('end')) {
-      convert.end = this.time2Mins(config.timeFormat, alarm.end);
-    } else {
-      convert.end = this.time2Mins(config.timeFormat, alarm.start, config.defaultAlarmEnd);
-    }
-
-    if (config.defaultAlarmIcon !== '') {
-      convert.alarmIcon = config.defaultAlarmIcon;
-    }
-
-    if (alarm.hasOwnProperty('alarmIcon')) {
-      convert.alarmIcon = alarm.alarmIcon;
-    }
-
-    convert.message = alarm.message;
-    return convert;
-  },
-
   sync: function (that) {
     const syncTimer = setInterval(() => {
       const now = new Date();
@@ -108,10 +85,6 @@ const H = {
   resetTimers: function (that) {
     if (that.currentTimer) {
       clearTimeout(that.currentTimer);
-    }
-
-    if (that.alarmTimer) {
-      clearInterval(that.alarmTimer);
     }
 
     if (that.newDayTimer) {

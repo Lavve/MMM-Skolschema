@@ -14,11 +14,6 @@
   align-items: baseline;
 }
 
-.MMM-Skolschema__content .schedule-row .schedule-time .far {
-  margin-left: 0.25rem;
-  font-size: 0.5rem;
-}
-
 .MMM-Skolschema__content .schedule-row.divider-before {
   padding: 0.25rem 0 0;
   margin: 0.25rem 0 0;
@@ -81,29 +76,4 @@
 
 .MMM-Skolschema__content .row .no-schedule {
   text-align: center;
-}
-
-.MMM-Skolschema__alarms {
-  position: absolute;
-  z-index: 55;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.MMM-Skolschema__alarms .MMM-Skolschema-alarm {
-  margin: 0.25rem auto;
-  padding: 0.5rem 1rem;
-  border-width: 2px;
-}
-
-.MMM-Skolschema__alarms .schedule_alarm-content {
-  display: flex;
-  flex-flow: row;
-  align-items: center;
-}
-
-.MMM-Skolschema__alarms .MMM-Skolschema-alarm .fa {
-  width: 20px;
-  margin-right: 0.5rem;
 }
