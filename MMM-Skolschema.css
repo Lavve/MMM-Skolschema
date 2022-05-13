@@ -1,52 +1,91 @@
-.MMM-Skolschema__content .day {
+.MMM-Skolschema__wrapper .day {
   text-align: center;
   padding: 0 0 0.5rem;
 }
 
-.MMM-Skolschema__content .schedule-rows {
+.MMM-Skolschema__wrapper .schedule-rows {
   margin-bottom: 1rem;
 }
 
-.MMM-Skolschema__content .schedule-row {
+.MMM-Skolschema__wrapper .schedule-row {
   display: flex;
   justify-content: space-between;
   flex-flow: row wrap;
   align-items: baseline;
+  transition: margin 0.23s, padding 0.23s, border 0.23s;
 }
 
-.MMM-Skolschema__content .schedule-row.divider-before {
-  padding: 0.25rem 0 0;
-  margin: 0.25rem 0 0;
+.MMM-Skolschema__wrapper .schedule-row.divider-before {
+  padding-top: 0.25rem;
+  margin-top: 0.25rem;
   border-top: 1px solid var(--color-text-dimmed);
 }
 
-.MMM-Skolschema__content .schedule-row.divider-after {
-  padding: 0 0 0.25rem;
-  margin: 0 0 0.25rem;
+.MMM-Skolschema__wrapper .schedule-row.divider-after {
+  padding-bottom: 0.25rem;
+  margin-bottom: 0.25rem;
   border-bottom: 1px solid var(--color-text-dimmed);
 }
 
-.MMM-Skolschema__content .schedule-row.divider-both {
+.MMM-Skolschema__wrapper .schedule-row.divider-both {
   padding: 0.25rem 0;
   margin: 0.25rem 0;
   border-bottom: 1px solid var(--color-text-dimmed);
   border-top: 1px solid var(--color-text-dimmed);
 }
 
-.MMM-Skolschema__content .schedule-row.divider-after .percent-bar,
-.MMM-Skolschema__content .schedule-row.divider-both .percent-bar {
+.MMM-Skolschema__wrapper .schedule-row.divider-after .percent-bar,
+.MMM-Skolschema__wrapper .schedule-row.divider-both .percent-bar {
   margin-bottom: 0;
 }
 
-.MMM-Skolschema__content .schedule-label {
+.MMM-Skolschema__wrapper .schedule-label {
   margin: 0 0 0 1rem;
+  position: relative;
 }
 
-.MMM-Skolschema__content .schedule-row.mirror .schedule-label {
+.MMM-Skolschema__wrapper .schedule-row.mirror .schedule-label {
   margin: 0 1rem 0 0;
 }
 
-.MMM-Skolschema__content .schedule-progress.percent-bar {
+.MMM-Skolschema__wrapper .schedule-row.upcomming .schedule-label {
+  padding-right: 15px;
+}
+
+.MMM-Skolschema__wrapper .schedule-row.mirror.upcomming .schedule-label {
+  padding-left: 15px;
+}
+
+.MMM-Skolschema__wrapper .schedule-row.upcomming .schedule-label:after {
+  content: '';
+  position: absolute;
+  top: 0.5rem;
+  right: 0;
+  display: block;
+  width: 0;
+  height: 0;
+  border: solid transparent;
+  border-width: 0.25rem;
+  border-right-color: #999;
+}
+
+.MMM-Skolschema__wrapper .schedule-row.upcomming.mirror .schedule-label:after {
+  display: none;
+}
+.MMM-Skolschema__wrapper .schedule-row.upcomming.mirror .schedule-label:before {
+  content: '';
+  position: absolute;
+  top: 0.5rem;
+  left: 0;
+  display: block;
+  width: 0;
+  height: 0;
+  border: solid transparent;
+  border-width: 0.25rem;
+  border-left-color: #999;
+}
+
+.MMM-Skolschema__wrapper .schedule-progress.percent-bar {
   width: 100%;
   height: 2px;
   position: relative;
@@ -54,7 +93,7 @@
   margin: 0.25rem 0 0.5rem;
 }
 
-.MMM-Skolschema__content .schedule-progress .percent-value {
+.MMM-Skolschema__wrapper .schedule-progress .percent-value {
   display: block;
   background: rgba(0, 0, 0, 0.4);
   position: absolute;
@@ -65,7 +104,7 @@
   transition: width 0.23s;
 }
 
-.MMM-Skolschema__content .schedule-progress.percent-pie {
+.MMM-Skolschema__wrapper .schedule-progress.percent-pie {
   margin: 0 0 0 1rem;
   width: 15px;
   height: 15px;
@@ -74,6 +113,6 @@
   background: var(----color-background);
 }
 
-.MMM-Skolschema__content .row .no-schedule {
+.MMM-Skolschema__wrapper .row .no-schedule {
   text-align: center;
 }

@@ -43,10 +43,12 @@ Theese are the nodes that are available to make your magic schedule.
 | --- | --- | --- | --- |
 | `showDayname` | bool | `true` | Show current day name above schedule |
 | `showEndTime` | bool | `false` | Choose if end time will be shown on each row or not |
-| `showCurrent` | bool | `true` | Decides if the current row will be highlighted |
+| `highlightCurrent` | bool | `true` | Decides if the current row will be highlighted |
 | `showCurrentProgress` | bool | `true` | Show a progressbar below current row in the schedule |
+| `dimFinished` | bool | `true` | Dim rows that has passed current time |
+| `showUpcomming` | bool | `true` | Show arrow at upcomming row if previous end time has passed and next isn't yet started |
 | `timeFormat` | int | `[config.timeFormat]` | Uses the time format stated in config.js as default, but can be overridden here if needed. Possible values are `12` or `24` |
-| `rowFormat` | str | `'time:label'` | Place time to the left or right of the label. `'time:label'` or `'label:time'` are the valid values |
+| `rowFormat` | str | `'time:label'` | Place time to the left or right of the label. `'time:label'` or `'label:time'` are the valid values here |
 | `showNextDayAt` | str | `'0:00'` | At what time the next day's schedule will show up |
 | `noScheduleText` | str | `''` | Text shown when schedule for the current day is empty |
 | `progressColor` | str | `'#fff'` | Color of the progress bar |
@@ -140,13 +142,16 @@ Screenshots will be provided at a later time
 
 ## TODO
 
+- [x] Add choice for dimming finished schedule row
+- [x] Add choice for showing upcomming schedule row
+- [x] Refactor helper functions
 - [x] Bug fix for cases when if next day is shown, that schedule's progress and current is shown
 - [x] Adjust time to exact second to match schedule
-- [x] Add choise for how progress is shown, `'bar'` or `'pie'`
-- [x] Add optional divider on schedule row
+- [x] Add choice for how progress is shown, `'bar'` or `'pie'`
+- [x] Add optional divider on schedule rows
 - [x] Make it work with either 12h or 24h time format
-- [x] Make choise for label-time or time-label templates
-- [x] Make choise for showing end time for each row
+- [x] Add choice for label-time or time-label templates
+- [x] Add choice for showing end time for each row
 
 ## Collaborate
 

@@ -9,9 +9,12 @@ Module.register('MMM-Skolschema', {
   // Define module defaults
   defaults: {
     showNextDayAt: '0:00',
+    showNextDayAtEnd: false,
     showDayname: true,
     showEndTime: false,
-    showCurrent: true,
+    highlightCurrent: true,
+    showUpcomming: true,
+    dimFinished: true,
     timeFormat: config.timeFormat,
     rowFormat: 'time:label',
     noScheduleText: '',
@@ -24,41 +27,52 @@ Module.register('MMM-Skolschema', {
   },
 
   getStyles: function () {
-    return [this.name + '.css'];
+    return [this.file(`${this.name}.css`)];
   },
 
   getScripts: function () {
-    return ['helpers.js'];
+    return [this.file(`${this.name}_helpers.js`)];
   },
 
   start: function () {
-    Log.info('Starting module: ' + this.name);
-
-    this.ready = !1;
-    H.sync(this);
+    Log.info(`Starting module :: ${this.name}`);
+    sync(this);
   },
 
   setCurrent: function () {
-    const nowTime = H.time2Mins(this.config.timeFormat);
+    const nowTime = t2m(this.config.timeFormat);
 
-    this.scheduleRows.forEach((rowEl) => {
+    this.scheduleRows.forEach((rowEl, i) => {
       const start = parseInt(rowEl.dataset.start, 10);
       const end = parseInt(rowEl.dataset.end, 10);
       const progressEl = rowEl.querySelector('.schedule-progress');
 
       if (start <= nowTime && nowTime < end) {
         rowEl.classList.add('bright');
+        rowEl.classList.remove('upcomming');
 
         if (this.config.showCurrentProgress) {
           if (progressEl) {
             progressEl.style.display = 'block';
           }
-          H.setProgress(rowEl, nowTime, this);
+          setProgress(rowEl, nowTime, this.config);
         }
       } else {
-        rowEl.classList.remove('bright');
+        rowEl.classList.remove('bright', 'upcomming');
         if (progressEl) {
           progressEl.style.display = 'none';
+        }
+
+        if (nowTime >= end && this.config.dimFinished) {
+          rowEl.classList.add('dimmed');
+        }
+
+        if ((this.scheduleRows[i - 1] !== undefined
+            && parseInt(this.scheduleRows[i - 1].dataset.end, 10) <= nowTime
+            && start > nowTime
+            && this.config.showUpcomming)
+            || (i === 0 && nowTime < start && this.config.showUpcomming)) {
+          rowEl.classList.add('upcomming');
         }
       }
     });
@@ -68,25 +82,14 @@ Module.register('MMM-Skolschema', {
     }, 60 * 1000);
   },
 
-  getScheduleList: function () {
-    const cellDiv = document.createElement('div');
-
-    if (
-      !this.currSchedule[this.scheduleDay].hasOwnProperty('schedule') ||
-      !this.currSchedule[this.scheduleDay].schedule.length
-    ) {
-      cellDiv.classList.add('no-schedule');
-      cellDiv.innerHTML = this.config.noScheduleText;
-      return cellDiv;
-    }
-
+  getScheduleRows: function () {
     const rowLength = this.currSchedule[this.scheduleDay].schedule.length;
 
-    this.scheduleRows = this.currSchedule[this.scheduleDay].schedule.map((row, i) => {
+    return this.currSchedule[this.scheduleDay].schedule.map((row, i) => {
       const rowEl = document.createElement('div');
       rowEl.classList.add('schedule-row');
 
-      const timeEl = document.createElement('span');
+      const timeEl = document.createElement('div');
       timeEl.classList.add('schedule-time', 'thin', 'xsmall');
 
       if (!row.hasOwnProperty('end') || row.end === '') {
@@ -102,7 +105,7 @@ Module.register('MMM-Skolschema', {
       }
       timeEl.innerHTML = timeContent;
 
-      const labelEl = document.createElement('span');
+      const labelEl = document.createElement('div');
       labelEl.classList.add('schedule-label');
       labelEl.innerHTML = row.label;
 
@@ -115,8 +118,8 @@ Module.register('MMM-Skolschema', {
         rowEl.appendChild(labelEl);
       }
 
-      const start = H.time2Mins(this.config.timeFormat, row.start);
-      const end = H.time2Mins(this.config.timeFormat, row.end);
+      const start = t2m(this.config.timeFormat, row.start);
+      const end = t2m(this.config.timeFormat, row.end);
 
       rowEl.dataset.start = start;
       rowEl.dataset.end = end;
@@ -124,38 +127,54 @@ Module.register('MMM-Skolschema', {
       if (row.hasOwnProperty('divider') && row.divider.trim() !== '') {
         rowEl.classList.add(`divider-${row.divider}`);
 
-        if (this.config.dividerColor !== '') {
+        if (this.config.dividerColor !== '#666') {
           rowEl.style.borderColor = this.config.dividerColor;
         }
       }
 
       // Prepare progress bar
-      if (this.config.showCurrentProgress && this.active) {
-        rowEl.appendChild(H.getProgress(this.config, start, end));
+      if (this.config.showCurrentProgress && this.isToday) {
+        rowEl.appendChild(createProgress(this.config, start, end));
       }
 
-      cellDiv.appendChild(rowEl);
       return rowEl;
     });
+  },
 
-    if (this.config.showCurrent && this.active) {
+  getScheduleList: function () {
+    const rowsEl = document.createElement('div');
+
+    if (
+      !this.currSchedule[this.scheduleDay].hasOwnProperty('schedule') ||
+      !this.currSchedule[this.scheduleDay].schedule.length
+    ) {
+      rowsEl.classList.add('no-schedule');
+      rowsEl.innerHTML = this.config.noScheduleText;
+      return rowsEl;
+    }
+
+    this.scheduleRows = this.getScheduleRows();
+    this.scheduleRows.forEach((el) => {
+      rowsEl.appendChild(el);
+    });
+
+    if (this.config.highlightCurrent && this.isToday) {
       this.setCurrent();
     }
 
-    cellDiv.classList.add('schedule-rows');
-    return cellDiv;
+    rowsEl.classList.add('schedule-rows');
+    return rowsEl;
   },
 
   getSchedule: function () {
-    const nowMins = H.time2Mins(this.config.timeFormat);
+    const nowMins = t2m(this.config.timeFormat);
 
     // Fix to get mon - sun
     const now = new Date();
-    const currDayNum = now.getDay() - 1 < 0 ? 6 : now.getDay() - 1;
-    this.currentDay = Object.keys(this.config.schedules[currDayNum])[0];
+    const currDayNum = now.getDay() === 0 ? 6 : now.getDay() - 1;
 
-    const thisDayNum =
-      nowMins >= this.nextDayMinutes ? (currDayNum + 1 > 6 ? 0 : currDayNum + 1) : currDayNum;
+    this.currentDay = Object.keys(this.config.schedules[currDayNum])[0];
+    const thisDayNum = nowMins >= this.nextDayMinutes ? (currDayNum + 1 > 6 ? 0 : currDayNum + 1) : currDayNum;
 
     const schedule = this.config.schedules.filter(
       (item) => Object.keys(item)[0] === Object.keys(this.config.schedules[thisDayNum])[0]
@@ -173,20 +192,20 @@ Module.register('MMM-Skolschema', {
     this.scheduleRows = [];
     this.scheduleDay = '';
     this.currentDay = '';
-    this.active = false;
-    this.nextDayMinutes = H.time2Mins(this.config.timeFormat, this.config.showNextDayAt);
-    H.resetTimers(this);
+    this.isToday = false;
+    this.nextDayMinutes = t2m(this.config.timeFormat, this.config.showNextDayAt);
+    resetAllTimers(this);
 
     const scheduleContent = document.createElement('div');
-    scheduleContent.classList.add('MMM-Skolschema__content');
+    scheduleContent.classList.add(`${this.name}__wrapper`);
 
     this.currSchedule = this.getSchedule();
     this.scheduleDay = Object.keys(this.currSchedule)[0];
     let tempDay = this.scheduleDay;
-    this.active = this.currentDay === this.scheduleDay;
+    this.isToday = this.currentDay === this.scheduleDay;
 
     const dayEl = document.createElement('div');
-    dayEl.classList.add('day', 'bright', 'thin');
+    dayEl.classList.add('day', 'bright', 'thin', 'center');
 
     if (this.config.showDayname) {
       dayEl.innerHTML = this.scheduleDay;
@@ -198,7 +217,7 @@ Module.register('MMM-Skolschema', {
     this.newDayTimer = setInterval(() => {
       this.currSchedule = this.getSchedule();
       this.scheduleDay = Object.keys(this.currSchedule)[0];
-      this.active = this.currentDay === this.scheduleDay;
+      this.isToday = this.currentDay === this.scheduleDay;
 
       if (tempDay !== this.scheduleDay) {
         // Let's show the next day
